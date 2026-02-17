@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>STRATX Report Generator</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Anton+SC&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #f5f7fa;
+            min-height: 100vh;
+            padding: 0;
+        }
+
+        .app-container {
+            display: grid;
+            grid-template-columns: 450px 1fr;
+            height: 100vh;
+        }
+
+        /* Form Section */
+        .form-section {
+            background: white;
+            padding: 40px;
+            overflow-y: auto;
+            border-right: 1px solid #e2e8f0;
+        }
+
+        .form-header {
+            margin-bottom: 35px;
+            padding-bottom: 25px;
+            border-bottom: 2px solid #e2e8f0;
+        }
+
+        .form-header h1 {
+            font-size: 28px;
+            font-weight: 800;
+            color: #1a202c;
+            margin-bottom: 8px;
+            letter-spacing: -0.5px;
+        }
+
+        .form-header p {
+            color: #64748b;
+            font-size: 14px;
+        }
+
+        .form-section-title {
+            font-size: 12px;
+            font-weight: 700;
+            color: #64748b;
+            margin: 30px 0 15px 0;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            color: #334155;
+            margin-bottom: 8px;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 15px;
+            transition: all 0.2s;
+            font-family: 'Inter', sans-serif;
+            background: white;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .form-group input[type="number"] {
+            font-family: 'SF Mono', 'Monaco', 'Courier New', monospace;
+        }
+
+        .form-group small {
+            display: block;
+            margin-top: 6px;
+            font-size: 12px;
+            color: #94a3b8;
+        }
+
+        .color-presets {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-bottom: 15px;
+        }
+
+        .color-preset-btn {
+            padding: 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .color-preset-btn:hover {
+            border-color: #cbd5e1;
+        }
+
+        .color-preset-btn.active {
+            border-color: #3b82f6;
+            background: #eff6ff;
+        }
+
+        .color-preview {
+            width: 100%;
+            height: 35px;
+            border-radius: 6px;
+            margin-bottom: 6px;
+        }
+
+        .download-btn {
+            width: 100%;
+            padding: 16px;
+            background: #3b82f6;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            margin-top: 30px;
+            transition: all 0.2s;
+        }
+
+        .download-btn:hover:not(:disabled) {
+            background: #2563eb;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        }
+
+        .download-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Preview Section */
+        .preview-section {
+            background: #f8fafc;
+            padding: 40px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .preview-header {
+            margin-bottom: 25px;
+        }
+
+        .preview-header h2 {
+            font-size: 24px;
+            font-weight: 700;
+            color: #1a202c;
+            margin-bottom: 5px;
+        }
+
+        .preview-header p {
+            color: #64748b;
+            font-size: 14px;
+        }
+
+        .preview-container {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Report Card Styles */
+        .report-card {
+            width: 700px;
+            height: 700px;
+            padding: 30px 55px 50px 55px;
+            border-radius: 0;
+            font-family: 'Inter', sans-serif;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .report-header {
+            text-align: center;
+        }
+
+        .logo-centered {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 18px;
+        }
+
+        .logo {
+            max-width: 240px;
+            max-height: 110px;
+            object-fit: contain;
+            object-position: center;
+        }
+
+        .report-title {
+            font-size: 20px;
+            font-weight: 900;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-bottom: 0;
+            opacity: 0.95;
+            font-family: 'Anton SC', sans-serif;
+        }
+
+        .date-section {
+            padding-top: 16px;
+            padding-bottom: 16px;
+            text-align: center;
+            border-bottom: 2px solid;
+        }
+
+        .date-badge {
+            display: inline-block;
+            font-size: 16px;
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+
+        .metrics-section {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 16px 0;
+        }
+
+        .metric-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 0;
+        }
+
+        .metric-row.highlight {
+            padding: 18px 0;
+        }
+
+        .metric-label {
+            font-size: 19px;
+            font-weight: 900;
+            opacity: 0.98;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        .metric-value {
+            font-size: 21px;
+            font-weight: 800;
+            font-family: 'SF Mono', 'Monaco', monospace;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            letter-spacing: -0.5px;
+        }
+
+        .metric-value.large {
+            font-size: 23px;
+        }
+
+        .metric-value.xlarge {
+            font-size: 25px;
+        }
+
+        .arrow-icon {
+            font-size: 17px;
+            line-height: 1;
+            opacity: 0.95;
+        }
+
+        .disclaimer {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 14px 18px;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 9px;
+            line-height: 1.5;
+            opacity: 0.95;
+        }
+
+        .disclaimer strong {
+            font-weight: 900;
+            font-size: 10px;
+        }
+
+        /* Scrollbar */
+        .form-section::-webkit-scrollbar,
+        .preview-section::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        .form-section::-webkit-scrollbar-track,
+        .preview-section::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+
+        .form-section::-webkit-scrollbar-thumb,
+        .preview-section::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useRef } = React;
+
+        const BG_PRESETS = {
+            light1: {
+                name: '1. Pearl White',
+                gradient: 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)',
+                textColor: '#1e293b',
+                border: 'rgba(30, 41, 59, 0.15)'
+            },
+            light2: {
+                name: '2. Soft Beige',
+                gradient: 'linear-gradient(135deg, #fef3c7 0%, #fde68a 100%)',
+                textColor: '#78350f',
+                border: 'rgba(120, 53, 15, 0.15)'
+            },
+            light3: {
+                name: '3. Mint Fresh',
+                gradient: 'linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%)',
+                textColor: '#065f46',
+                border: 'rgba(6, 95, 70, 0.15)'
+            },
+            light4: {
+                name: '4. Sky Blue',
+                gradient: 'linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%)',
+                textColor: '#0c4a6e',
+                border: 'rgba(12, 74, 110, 0.15)'
+            },
+            light5: {
+                name: '5. Lavender Dream',
+                gradient: 'linear-gradient(135deg, #f3e8ff 0%, #e9d5ff 100%)',
+                textColor: '#581c87',
+                border: 'rgba(88, 28, 135, 0.15)'
+            },
+            light6: {
+                name: '6. Rose Quartz',
+                gradient: 'linear-gradient(135deg, #ffe4e6 0%, #fecdd3 100%)',
+                textColor: '#881337',
+                border: 'rgba(136, 19, 55, 0.15)'
+            },
+            dark1: {
+                name: '7. Navy Elite',
+                gradient: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)',
+                textColor: '#ffffff',
+                border: 'rgba(255, 255, 255, 0.2)'
+            },
+            dark2: {
+                name: '8. Charcoal Pro',
+                gradient: 'linear-gradient(135deg, #18181b 0%, #27272a 100%)',
+                textColor: '#ffffff',
+                border: 'rgba(255, 255, 255, 0.2)'
+            },
+            dark3: {
+                name: '9. Deep Forest',
+                gradient: 'linear-gradient(135deg, #14532d 0%, #166534 100%)',
+                textColor: '#ffffff',
+                border: 'rgba(255, 255, 255, 0.2)'
+            },
+            dark4: {
+                name: '10. Midnight Blue',
+                gradient: 'linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%)',
+                textColor: '#ffffff',
+                border: 'rgba(255, 255, 255, 0.2)'
+            }
+        };
+
+        function App() {
+            const [formData, setFormData] = useState({
+                date: new Date().toISOString().split('T')[0],
+                reportType: 'daily',
+                totalCapital: '120000000',
+                todayPL: '16500',
+                todayROI: '0.14',
+                monthPL: '424008',
+                monthROI: '3.53',
+                disclaimer: 'Personal trades for transparency only. Broker-verified, publicly accessible. Not financial advice. Trading involves risk. Past performance does not guarantee future results.'
+            });
+
+            const [bgScheme, setBgScheme] = useState('light1');
+            const [logo, setLogo] = useState(null);
+            const [uploading, setUploading] = useState(false);
+            const reportRef = useRef(null);
+
+            const handleInputChange = (e) => {
+                const { name, value } = e.target;
+                setFormData(prev => ({
+                    ...prev,
+                    [name]: value
+                }));
+            };
+
+            const handleLogoUpload = (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onloadend = () => {
+                        setLogo(reader.result);
+                    };
+                    reader.readAsDataURL(file);
+                }
+            };
+
+            const formatCurrency = (value) => {
+                const num = parseFloat(value);
+                if (isNaN(num)) return '₹0';
+                
+                const absNum = Math.abs(num);
+                if (absNum >= 10000000) {
+                    return `₹${(num / 10000000).toFixed(2)} Cr`;
+                } else if (absNum >= 100000) {
+                    return `₹${(num / 100000).toFixed(2)} Lakh`;
+                } else {
+                    return `₹${num.toLocaleString('en-IN')}`;
+                }
+            };
+
+            const formatDate = (dateString) => {
+                const date = new Date(dateString);
+                return date.toLocaleDateString('en-IN', { 
+                    day: '2-digit', 
+                    month: 'short', 
+                    year: 'numeric' 
+                });
+            };
+
+            const downloadReport = async () => {
+                if (reportRef.current) {
+                    setUploading(true);
+                    try {
+                        const canvas = await html2canvas(reportRef.current, {
+                            scale: 4,
+                            backgroundColor: null,
+                            logging: false,
+                            useCORS: true,
+                            allowTaint: true,
+                        });
+                        
+                        const link = document.createElement('a');
+                        link.download = `STRATX_Report_${formData.date}.png`;
+                        link.href = canvas.toDataURL('image/png');
+                        link.click();
+                    } catch (error) {
+                        console.error('Error generating image:', error);
+                        alert('Error generating image. Please try again.');
+                    } finally {
+                        setUploading(false);
+                    }
+                }
+            };
+
+            const getPLColor = (value) => {
+                const num = parseFloat(value);
+                if (num > 0) return '#10b981';
+                if (num < 0) return '#ef4444';
+                return '#94a3b8';
+            };
+
+            const getPLSign = (value) => {
+                const num = parseFloat(value);
+                if (num > 0) return '+';
+                return '';
+            };
+
+            const getArrow = (value) => {
+                const num = parseFloat(value);
+                if (num > 0) return '▲';
+                if (num < 0) return '▼';
+                return '●';
+            };
+
+            const getReportTitle = () => {
+                return formData.reportType === 'daily' ? "Today's Overview" : "Monthly Overview";
+            };
+
+            const currentPreset = BG_PRESETS[bgScheme];
+
+            return (
+                <div className="app-container">
+                    <div className="form-section">
+                        <div className="form-header">
+                            <h1>📊 STRATX Report Generator</h1>
+                            <p>Create professional trading reports</p>
+                        </div>
+
+                        <form className="data-form">
+                            <div className="form-section-title">Report Type</div>
+                            
+                            <div className="form-group">
+                                <label>Report Type</label>
+                                <select
+                                    name="reportType"
+                                    value={formData.reportType}
+                                    onChange={handleInputChange}
+                                >
+                                    <option value="daily">Today's Overview</option>
+                                    <option value="monthly">Monthly Overview</option>
+                                </select>
+                            </div>
+
+                            <div className="form-group">
+                                <label>Date</label>
+                                <input
+                                    type="date"
+                                    name="date"
+                                    value={formData.date}
+                                    onChange={handleInputChange}
+                                />
+                            </div>
+
+                            <div className="form-section-title">Capital & Performance</div>
+                            
+                            <div className="form-group">
+                                <label>Total Capital (₹)</label>
+                                <input
+                                    type="number"
+                                    name="totalCapital"
+                                    value={formData.totalCapital}
+                                    onChange={handleInputChange}
+                                    placeholder="120000000"
+                                />
+                            </div>
+
+                            <div className="form-group">
+                                <label>Today's P&L (₹)</label>
+                                <input
+                                    type="number"
+                                    name="todayPL"
+                                    value={formData.todayPL}
+                                    onChange={handleInputChange}
+                                    placeholder="16500"
+                                />
+                            </div>
+
+                            <div className="form-group">
+                                <label>Today's ROI (%)</label>
+                                <input
+                                    type="number"
+                                    step="0.01"
+                                    name="todayROI"
+                                    value={formData.todayROI}
+                                    onChange={handleInputChange}
+                                    placeholder="0.14"
+                                />
+                            </div>
+
+                            <div className="form-group">
+                                <label>Current Month P&L (₹)</label>
+                                <input
+                                    type="number"
+                                    name="monthPL"
+                                    value={formData.monthPL}
+                                    onChange={handleInputChange}
+                                    placeholder="424008"
+                                />
+                            </div>
+
+                            <div className="form-group">
+                                <label>Current Month ROI (%)</label>
+                                <input
+                                    type="number"
+                                    step="0.01"
+                                    name="monthROI"
+                                    value={formData.monthROI}
+                                    onChange={handleInputChange}
+                                    placeholder="3.53"
+                                />
+                            </div>
+
+                            <div className="form-section-title">Logo</div>
+
+                            <div className="form-group">
+                                <label>Upload Logo</label>
+                                <input
+                                    type="file"
+                                    accept="image/png,image/jpeg,image/jpg"
+                                    onChange={handleLogoUpload}
+                                />
+                                <small>PNG with transparent background recommended</small>
+                            </div>
+
+                            <div className="form-section-title">Color Theme</div>
+
+                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '10px', marginBottom: '15px' }}>
+                                {Object.entries(BG_PRESETS).map(([key, preset]) => (
+                                    <button
+                                        key={key}
+                                        type="button"
+                                        className={`color-preset-btn ${bgScheme === key ? 'active' : ''}`}
+                                        onClick={() => setBgScheme(key)}
+                                    >
+                                        <div className="color-preview" style={{ background: preset.gradient, height: '30px' }}></div>
+                                        <div style={{ fontSize: '10px', marginTop: '4px' }}>{preset.name}</div>
+                                    </button>
+                                ))}
+                            </div>
+
+                            <div className="form-section-title">Disclaimer</div>
+
+                            <div className="form-group">
+                                <label>Disclaimer Text</label>
+                                <textarea
+                                    name="disclaimer"
+                                    value={formData.disclaimer}
+                                    onChange={handleInputChange}
+                                    rows="5"
+                                />
+                            </div>
+
+                            <button 
+                                type="button" 
+                                className="download-btn"
+                                onClick={downloadReport}
+                                disabled={uploading}
+                            >
+                                {uploading ? '⏳ Generating PNG...' : '📥 Download Report'}
+                            </button>
+                        </form>
+                    </div>
+
+                    <div className="preview-section">
+                        <div className="preview-header">
+                            <h2>Live Preview</h2>
+                            <p>Your report will look exactly like this</p>
+                        </div>
+
+                        <div className="preview-container">
+                            <div 
+                                ref={reportRef} 
+                                className="report-card" 
+                                style={{ 
+                                    background: currentPreset.gradient,
+                                    color: currentPreset.textColor
+                                }}
+                            >
+                                <div className="report-header">
+                                    <div className="logo-centered">
+                                        {logo && <img src={logo} alt="Logo" className="logo" crossOrigin="anonymous" />}
+                                    </div>
+                                    <div className="report-title" style={{ color: currentPreset.textColor }}>
+                                        {getReportTitle()}
+                                    </div>
+                                    <div className="date-section" style={{ borderBottom: `2px solid ${currentPreset.border}` }}>
+                                        <div className="date-badge" style={{ color: currentPreset.textColor }}>
+                                            {formatDate(formData.date)}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="metrics-section">
+                                    <div className="metric-row highlight" style={{ borderBottom: `1.5px solid ${currentPreset.border}` }}>
+                                        <span className="metric-label" style={{ color: currentPreset.textColor }}>Total Capital</span>
+                                        <span className="metric-value xlarge" style={{ color: currentPreset.textColor }}>
+                                            {formatCurrency(formData.totalCapital)}
+                                        </span>
+                                    </div>
+
+                                    <div className="metric-row highlight" style={{ borderBottom: `1.5px solid ${currentPreset.border}` }}>
+                                        <span className="metric-label" style={{ color: currentPreset.textColor }}>Today's P&L</span>
+                                        <span 
+                                            className="metric-value xlarge" 
+                                            style={{ color: getPLColor(formData.todayPL) }}
+                                        >
+                                            <span className="arrow-icon">{getArrow(formData.todayPL)}</span>
+                                            {getPLSign(formData.todayPL)}{formatCurrency(formData.todayPL)}
+                                        </span>
+                                    </div>
+
+                                    <div className="metric-row" style={{ borderBottom: `1.5px solid ${currentPreset.border}` }}>
+                                        <span className="metric-label" style={{ color: currentPreset.textColor }}>Today's ROI</span>
+                                        <span 
+                                            className="metric-value large"
+                                            style={{ color: getPLColor(formData.todayROI) }}
+                                        >
+                                            <span className="arrow-icon">{getArrow(formData.todayROI)}</span>
+                                            {getPLSign(formData.todayROI)}{formData.todayROI}%
+                                        </span>
+                                    </div>
+
+                                    <div className="metric-row" style={{ borderBottom: `1.5px solid ${currentPreset.border}` }}>
+                                        <span className="metric-label" style={{ color: currentPreset.textColor }}>Month P&L</span>
+                                        <span 
+                                            className="metric-value large"
+                                            style={{ color: getPLColor(formData.monthPL) }}
+                                        >
+                                            <span className="arrow-icon">{getArrow(formData.monthPL)}</span>
+                                            {getPLSign(formData.monthPL)}{formatCurrency(formData.monthPL)}
+                                        </span>
+                                    </div>
+
+                                    <div className="metric-row">
+                                        <span className="metric-label" style={{ color: currentPreset.textColor }}>Month ROI</span>
+                                        <span 
+                                            className="metric-value large"
+                                            style={{ color: getPLColor(formData.monthROI) }}
+                                        >
+                                            <span className="arrow-icon">{getArrow(formData.monthROI)}</span>
+                                            {getPLSign(formData.monthROI)}{formData.monthROI}%
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <div className="disclaimer" style={{ borderColor: currentPreset.border, color: currentPreset.textColor }}>
+                                    <p><strong>DISCLAIMER:</strong> {formData.disclaimer}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+</html>
