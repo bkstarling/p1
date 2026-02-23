@@ -1,410 +1,1011 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>STRATX Report Generator</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <script
+      crossorigin
+      src="https://unpkg.com/react@18/umd/react.production.min.js"
+    ></script>
+    <script
+      crossorigin
+      src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"
+    ></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
-        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
-        :root {
-            --bg: #070c18;
-            --surface: #0c1526;
-            --surface2: #101d33;
-            --border: rgba(255,255,255,0.06);
-            --border2: rgba(255,255,255,0.10);
-            --text: #dce8f8;
-            --muted: #384e6e;
-            --dim: #7090b8;
-            --blue: #3b82f6;
-            --blue-glow: rgba(59,130,246,0.18);
-        }
-        body { font-family: 'Outfit', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
-        .app { display: grid; grid-template-columns: 500px 1fr; height: 100vh; }
+      *,
+      *::before,
+      *::after {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      :root {
+        --bg: #070c18;
+        --surface: #0c1526;
+        --surface2: #101d33;
+        --border: rgba(255, 255, 255, 0.06);
+        --border2: rgba(255, 255, 255, 0.1);
+        --text: #dce8f8;
+        --muted: #384e6e;
+        --dim: #7090b8;
+        --blue: #3b82f6;
+        --blue-glow: rgba(59, 130, 246, 0.18);
+      }
+      body {
+        font-family: 'Outfit', sans-serif;
+        background: var(--bg);
+        color: var(--text);
+        min-height: 100vh;
+      }
+      .app {
+        display: grid;
+        grid-template-columns: 500px 1fr;
+        height: 100vh;
+      }
 
-        /* ── SIDEBAR ── */
-        .sidebar { background: var(--surface); border-right: 1px solid var(--border); overflow-y: auto; display: flex; flex-direction: column; }
-        .sidebar::-webkit-scrollbar { width: 4px; }
-        .sidebar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 2px; }
+      /* ── SIDEBAR ── */
+      .sidebar {
+        background: var(--surface);
+        border-right: 1px solid var(--border);
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+      }
+      .sidebar::-webkit-scrollbar {
+        width: 4px;
+      }
+      .sidebar::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.08);
+        border-radius: 2px;
+      }
 
-        .s-head { padding: 24px 24px 18px; border-bottom: 1px solid var(--border); background: linear-gradient(180deg,rgba(59,130,246,0.08) 0%,transparent 100%); }
-        .s-head h1 { font-size: 17px; font-weight: 700; color: var(--text); }
-        .s-head p  { font-size: 12px; color: var(--muted); margin-top: 3px; }
+      .s-head {
+        padding: 24px 24px 18px;
+        border-bottom: 1px solid var(--border);
+        background: linear-gradient(
+          180deg,
+          rgba(59, 130, 246, 0.08) 0%,
+          transparent 100%
+        );
+      }
+      .s-head h1 {
+        font-size: 17px;
+        font-weight: 700;
+        color: var(--text);
+      }
+      .s-head p {
+        font-size: 12px;
+        color: var(--muted);
+        margin-top: 3px;
+      }
 
-        .s-body { padding: 16px 20px; flex: 1; display: flex; flex-direction: column; gap: 10px; }
+      .s-body {
+        padding: 16px 20px;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
 
-        /* FORM CARDS */
-        .fc { background: var(--surface2); border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; }
-        .fc-title { font-size: 10px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 1.4px; margin-bottom: 12px; }
+      /* FORM CARDS */
+      .fc {
+        background: var(--surface2);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 14px 16px;
+      }
+      .fc-title {
+        font-size: 10px;
+        font-weight: 700;
+        color: var(--muted);
+        text-transform: uppercase;
+        letter-spacing: 1.4px;
+        margin-bottom: 12px;
+      }
 
-        .fg { margin-bottom: 9px; }
-        .fg:last-child { margin-bottom: 0; }
-        .fg label { display: block; font-size: 11px; font-weight: 600; color: var(--dim); margin-bottom: 5px; }
+      .fg {
+        margin-bottom: 9px;
+      }
+      .fg:last-child {
+        margin-bottom: 0;
+      }
+      .fg label {
+        display: block;
+        font-size: 11px;
+        font-weight: 600;
+        color: var(--dim);
+        margin-bottom: 5px;
+      }
 
-        .fg input, .fg select, .fg textarea {
-            width: 100%; padding: 8px 11px;
-            background: var(--bg); border: 1px solid var(--border2); border-radius: 8px;
-            font-size: 13px; font-family: 'Outfit', sans-serif; color: var(--text);
-            transition: border-color .15s, box-shadow .15s;
-        }
-        .fg input[type="number"], .fg input[type="date"] { font-family: 'JetBrains Mono', monospace; font-size: 12px; }
-        .fg input[type="range"] { padding: 4px 0; background: none; border: none; accent-color: var(--blue); cursor: pointer; }
-        .fg input[type="range"]:focus { box-shadow: none; }
-        .fg input:focus, .fg select:focus, .fg textarea:focus { outline: none; border-color: var(--blue); box-shadow: 0 0 0 3px var(--blue-glow); }
-        .fg select option { background: #0c1526; }
-        .fg small { display: block; margin-top: 4px; font-size: 10px; color: var(--muted); }
-        .two { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; }
+      .fg input,
+      .fg select,
+      .fg textarea {
+        width: 100%;
+        padding: 8px 11px;
+        background: var(--bg);
+        border: 1px solid var(--border2);
+        border-radius: 8px;
+        font-size: 13px;
+        font-family: 'Outfit', sans-serif;
+        color: var(--text);
+        transition:
+          border-color 0.15s,
+          box-shadow 0.15s;
+      }
+      .fg input[type='number'],
+      .fg input[type='date'] {
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 12px;
+      }
+      .fg input[type='range'] {
+        padding: 4px 0;
+        background: none;
+        border: none;
+        accent-color: var(--blue);
+        cursor: pointer;
+      }
+      .fg input[type='range']:focus {
+        box-shadow: none;
+      }
+      .fg input:focus,
+      .fg select:focus,
+      .fg textarea:focus {
+        outline: none;
+        border-color: var(--blue);
+        box-shadow: 0 0 0 3px var(--blue-glow);
+      }
+      .fg select option {
+        background: #0c1526;
+      }
+      .fg small {
+        display: block;
+        margin-top: 4px;
+        font-size: 10px;
+        color: var(--muted);
+      }
+      .two {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 9px;
+      }
 
-        /* Font size row */
-        .fs-row { display: flex; align-items: center; gap: 10px; }
-        .fs-row input[type="range"] { flex: 1; }
-        .fs-badge { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--blue); min-width: 30px; text-align: right; }
+      /* Font size row */
+      .fs-row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .fs-row input[type='range'] {
+        flex: 1;
+      }
+      .fs-badge {
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 11px;
+        color: var(--blue);
+        min-width: 30px;
+        text-align: right;
+      }
 
-        /* TYPE MANAGER */
-        .type-list { display: flex; flex-direction: column; gap: 6px; margin-bottom: 10px; }
-        .type-item { display: flex; align-items: center; gap: 8px; padding: 7px 10px; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; transition: border-color .15s, background .15s; }
-        .type-item.sel { border-color: rgba(59,130,246,0.4); background: rgba(59,130,246,0.08); }
-        .type-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
-        .type-btn { background: none; border: none; cursor: pointer; flex: 1; text-align: left; font-size: 12px; font-weight: 500; font-family: 'Outfit', sans-serif; color: var(--dim); }
-        .type-item.sel .type-btn { color: var(--text); }
-        .type-del { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 15px; padding: 0 2px; line-height: 1; transition: color .15s; }
-        .type-del:hover { color: #f87171; }
-        .add-row { display: flex; gap: 7px; }
-        .add-input { flex: 1; padding: 8px 11px; background: var(--bg); border: 1px solid var(--border2); border-radius: 8px; font-size: 12px; font-family: 'Outfit', sans-serif; color: var(--text); }
-        .add-input:focus { outline: none; border-color: var(--blue); }
-        .add-btn { padding: 8px 13px; background: var(--blue); color: #fff; border: none; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; font-family: 'Outfit', sans-serif; transition: background .15s; white-space: nowrap; }
-        .add-btn:hover { background: #2563eb; }
+      /* TYPE MANAGER */
+      .type-list {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        margin-bottom: 10px;
+      }
+      .type-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 7px 10px;
+        background: var(--bg);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        transition:
+          border-color 0.15s,
+          background 0.15s;
+      }
+      .type-item.sel {
+        border-color: rgba(59, 130, 246, 0.4);
+        background: rgba(59, 130, 246, 0.08);
+      }
+      .type-dot {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        flex-shrink: 0;
+      }
+      .type-btn {
+        background: none;
+        border: none;
+        cursor: pointer;
+        flex: 1;
+        text-align: left;
+        font-size: 12px;
+        font-weight: 500;
+        font-family: 'Outfit', sans-serif;
+        color: var(--dim);
+      }
+      .type-item.sel .type-btn {
+        color: var(--text);
+      }
+      .type-del {
+        background: none;
+        border: none;
+        color: var(--muted);
+        cursor: pointer;
+        font-size: 15px;
+        padding: 0 2px;
+        line-height: 1;
+        transition: color 0.15s;
+      }
+      .type-del:hover {
+        color: #f87171;
+      }
+      .add-row {
+        display: flex;
+        gap: 7px;
+      }
+      .add-input {
+        flex: 1;
+        padding: 8px 11px;
+        background: var(--bg);
+        border: 1px solid var(--border2);
+        border-radius: 8px;
+        font-size: 12px;
+        font-family: 'Outfit', sans-serif;
+        color: var(--text);
+      }
+      .add-input:focus {
+        outline: none;
+        border-color: var(--blue);
+      }
+      .add-btn {
+        padding: 8px 13px;
+        background: var(--blue);
+        color: #fff;
+        border: none;
+        border-radius: 8px;
+        font-size: 12px;
+        font-weight: 600;
+        cursor: pointer;
+        font-family: 'Outfit', sans-serif;
+        transition: background 0.15s;
+        white-space: nowrap;
+      }
+      .add-btn:hover {
+        background: #2563eb;
+      }
 
-        /* THEME */
-        .theme-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
-        .t-btn { border: 2px solid var(--border); border-radius: 10px; background: none; cursor: pointer; overflow: hidden; padding: 0; transition: border-color .15s, box-shadow .15s; }
-        .t-btn:hover { border-color: var(--border2); }
-        .t-btn.on { border-color: var(--blue); box-shadow: 0 0 0 3px var(--blue-glow); }
-        .t-swatch { height: 34px; width: 100%; }
-        .t-name { padding: 5px 4px; font-size: 9px; font-weight: 600; color: var(--muted); text-align: center; background: var(--bg); }
-        .t-btn.on .t-name { color: #60a5fa; }
+      /* THEME */
+      .theme-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 8px;
+      }
+      .t-btn {
+        border: 2px solid var(--border);
+        border-radius: 10px;
+        background: none;
+        cursor: pointer;
+        overflow: hidden;
+        padding: 0;
+        transition:
+          border-color 0.15s,
+          box-shadow 0.15s;
+      }
+      .t-btn:hover {
+        border-color: var(--border2);
+      }
+      .t-btn.on {
+        border-color: var(--blue);
+        box-shadow: 0 0 0 3px var(--blue-glow);
+      }
+      .t-swatch {
+        height: 34px;
+        width: 100%;
+      }
+      .t-name {
+        padding: 5px 4px;
+        font-size: 9px;
+        font-weight: 600;
+        color: var(--muted);
+        text-align: center;
+        background: var(--bg);
+      }
+      .t-btn.on .t-name {
+        color: #60a5fa;
+      }
 
-        /* DOWNLOAD */
-        .dl-btn { width: 100%; padding: 13px; background: linear-gradient(135deg,#3b82f6,#2563eb); color: #fff; border: none; border-radius: 10px; font-size: 14px; font-weight: 700; font-family: 'Outfit', sans-serif; cursor: pointer; letter-spacing: 0.3px; transition: all .2s; margin-top: 4px; }
-        .dl-btn:hover:not(:disabled) { background: linear-gradient(135deg,#2563eb,#1d4ed8); box-shadow: 0 8px 24px rgba(59,130,246,.35); transform: translateY(-1px); }
-        .dl-btn:disabled { opacity: .45; cursor: not-allowed; }
+      /* DOWNLOAD */
+      .dl-btn {
+        width: 100%;
+        padding: 13px;
+        background: linear-gradient(135deg, #3b82f6, #2563eb);
+        color: #fff;
+        border: none;
+        border-radius: 10px;
+        font-size: 14px;
+        font-weight: 700;
+        font-family: 'Outfit', sans-serif;
+        cursor: pointer;
+        letter-spacing: 0.3px;
+        transition: all 0.2s;
+        margin-top: 4px;
+      }
+      .dl-btn:hover:not(:disabled) {
+        background: linear-gradient(135deg, #2563eb, #1d4ed8);
+        box-shadow: 0 8px 24px rgba(59, 130, 246, 0.35);
+        transform: translateY(-1px);
+      }
+      .dl-btn:disabled {
+        opacity: 0.45;
+        cursor: not-allowed;
+      }
 
-        /* PREVIEW */
-        .preview { background: #04080f; overflow-y: auto; display: flex; flex-direction: column; padding: 36px 40px; }
-        .preview::-webkit-scrollbar { width: 4px; }
-        .preview::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 2px; }
-        .p-head { margin-bottom: 24px; }
-        .p-head h2 { font-size: 16px; font-weight: 700; }
-        .p-head p  { font-size: 12px; color: var(--muted); margin-top: 2px; }
-        .p-wrap { flex: 1; display: flex; align-items: center; justify-content: center; }
+      /* PREVIEW */
+      .preview {
+        background: #04080f;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        padding: 36px 40px;
+      }
+      .preview::-webkit-scrollbar {
+        width: 4px;
+      }
+      .preview::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.08);
+        border-radius: 2px;
+      }
+      .p-head {
+        margin-bottom: 24px;
+      }
+      .p-head h2 {
+        font-size: 16px;
+        font-weight: 700;
+      }
+      .p-head p {
+        font-size: 12px;
+        color: var(--muted);
+        margin-top: 2px;
+      }
+      .p-wrap {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
 
-        /* ── REPORT CARD ── */
-        .rc { width: 700px; height: 700px; padding: 30px 38px 32px; display: flex; flex-direction: column; box-shadow: 0 40px 120px rgba(0,0,0,.85); }
+      /* ── REPORT CARD ── */
+      .rc {
+        width: 700px;
+        height: 700px;
+        padding: 30px 38px 32px;
+        display: flex;
+        flex-direction: column;
+        box-shadow: 0 40px 120px rgba(0, 0, 0, 0.85);
+      }
 
-        .rc-hdr { text-align: center; margin-bottom: 12px; }
-        .rc-logo-wrap { display: flex; justify-content: center; margin-bottom: 12px; }
-        .rc-logo { max-width: 270px; max-height: 120px; object-fit: contain; }
+      .rc-hdr {
+        text-align: center;
+        margin-bottom: 12px;
+      }
+      .rc-logo-wrap {
+        display: flex;
+        justify-content: center;
+        margin-bottom: 12px;
+      }
+      .rc-logo {
+        max-width: 270px;
+        max-height: 120px;
+        object-fit: contain;
+      }
 
-        /* METRICS GRID */
-        .mgrid { flex: 1; display: grid; grid-template-columns: 1fr 1fr; gap: 9px; padding: 10px 0 9px; }
-        .mc { border-radius: 16px; padding: 18px 20px; display: flex; flex-direction: column; justify-content: space-between;
-              background: rgba(255,255,255,0.07);
-              backdrop-filter: blur(16px) saturate(160%);
-              -webkit-backdrop-filter: blur(16px) saturate(160%);
-              border: 1px solid rgba(255,255,255,0.12); }
-        .mc.wide { grid-column: span 2; flex-direction: row; align-items: center; padding: 18px 24px; }
-        .mc-arr { opacity: 0.9; }
+      /* METRICS GRID */
+      .mgrid {
+        flex: 1;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 9px;
+        padding: 10px 0 9px;
+      }
+      .mc {
+        border-radius: 16px;
+        padding: 18px 20px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        background: rgba(255, 255, 255, 0.07);
+        backdrop-filter: blur(16px) saturate(160%);
+        -webkit-backdrop-filter: blur(16px) saturate(160%);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+      }
+      .mc.wide {
+        grid-column: span 2;
+        flex-direction: row;
+        align-items: center;
+        padding: 18px 24px;
+      }
+      .mc-arr {
+        opacity: 0.9;
+      }
 
-        /* disclaimer */
-        .rc-disc { text-align: center; line-height: 1.6; padding: 10px 14px; border-radius: 10px;
-                   background: rgba(0,0,0,0.22); color: rgba(255,255,255,0.4); }
-        .rc-disc strong { color: rgba(255,255,255,0.6); letter-spacing: 0.4px; }
+      /* disclaimer */
+      .rc-disc {
+        text-align: center;
+        line-height: 1.6;
+        padding: 10px 14px;
+        border-radius: 10px;
+        background: rgba(0, 0, 0, 0.22);
+        color: rgba(255, 255, 255, 0.4);
+      }
+      .rc-disc strong {
+        color: rgba(255, 255, 255, 0.6);
+        letter-spacing: 0.4px;
+      }
     </style>
-</head>
-<body>
-<div id="root"></div>
-<script type="text/babel">
-const { useState, useRef } = React;
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="text/babel">
+      const { useState, useRef } = React;
 
-/* ── THEMES ── gentle gradients, glassmorphism card tints */
-const THEMES = {
-    midnight: {
-        name: 'Midnight Blue',
-        bg: 'linear-gradient(145deg, #06101f 0%, #0d1f48 40%, #091630 70%, #050e20 100%)',
-        dateBorder: 'rgba(147,197,253,0.25)',
-        textColor: '#ddeeff',
-        /* card 0=wide total capital, 1=todayPL, 2=todayROI, 3=monthPL, 4=monthROI */
-        tints: [
-            'rgba(59,130,246,0.28)',    // blue  — Total Capital
-            'rgba(124,58,237,0.30)',    // violet — Today P&L
-            'rgba(20,184,166,0.28)',    // teal  — Today ROI
-            'rgba(234,88,12,0.26)',     // orange — Month P&L
-            'rgba(148,163,184,0.22)',   // slate — Month ROI
-        ],
-    },
-    carbon: {
-        name: 'Carbon Slate',
-        bg: 'linear-gradient(145deg, #090a10 0%, #111525 40%, #0f1322 70%, #070810 100%)',
-        dateBorder: 'rgba(203,213,225,0.2)',
-        textColor: '#e2e8f5',
-        tints: [
-            'rgba(99,102,241,0.28)',    // indigo — Total Capital
-            'rgba(14,165,233,0.26)',    // sky   — Today P&L
-            'rgba(168,85,247,0.26)',    // purple — Today ROI
-            'rgba(234,179,8,0.24)',     // amber — Month P&L
-            'rgba(148,163,184,0.20)',   // grey  — Month ROI
-        ],
-    },
-    obsidian: {
-        name: 'Obsidian Green',
-        bg: 'linear-gradient(145deg, #030c07 0%, #082012 40%, #061a0e 70%, #030b06 100%)',
-        dateBorder: 'rgba(52,211,153,0.25)',
-        textColor: '#cff0e2',
-        tints: [
-            'rgba(16,185,129,0.28)',    // emerald — Total Capital
-            'rgba(6,182,212,0.26)',     // cyan   — Today P&L
-            'rgba(124,58,237,0.26)',    // violet — Today ROI
-            'rgba(245,158,11,0.24)',    // amber  — Month P&L
-            'rgba(148,163,184,0.20)',   // slate  — Month ROI
-        ],
-    }
-};
+      /* ── THEMES ── gentle gradients, glassmorphism card tints */
+      const THEMES = {
+        midnight: {
+          name: 'Midnight Blue',
+          bg: 'linear-gradient(145deg, #06101f 0%, #0d1f48 40%, #091630 70%, #050e20 100%)',
+          dateBorder: 'rgba(147,197,253,0.25)',
+          textColor: '#ddeeff',
+          /* card 0=wide total capital, 1=todayPL, 2=todayROI, 3=monthPL, 4=monthROI */
+          tints: [
+            'rgba(59,130,246,0.28)', // blue  — Total Capital
+            'rgba(124,58,237,0.30)', // violet — Today P&L
+            'rgba(20,184,166,0.28)', // teal  — Today ROI
+            'rgba(234,88,12,0.26)', // orange — Month P&L
+            'rgba(148,163,184,0.22)', // slate — Month ROI
+          ],
+        },
+        carbon: {
+          name: 'Carbon Slate',
+          bg: 'linear-gradient(145deg, #090a10 0%, #111525 40%, #0f1322 70%, #070810 100%)',
+          dateBorder: 'rgba(203,213,225,0.2)',
+          textColor: '#e2e8f5',
+          tints: [
+            'rgba(99,102,241,0.28)', // indigo — Total Capital
+            'rgba(14,165,233,0.26)', // sky   — Today P&L
+            'rgba(168,85,247,0.26)', // purple — Today ROI
+            'rgba(234,179,8,0.24)', // amber — Month P&L
+            'rgba(148,163,184,0.20)', // grey  — Month ROI
+          ],
+        },
+        obsidian: {
+          name: 'Obsidian Green',
+          bg: 'linear-gradient(145deg, #030c07 0%, #082012 40%, #061a0e 70%, #030b06 100%)',
+          dateBorder: 'rgba(52,211,153,0.25)',
+          textColor: '#cff0e2',
+          tints: [
+            'rgba(16,185,129,0.28)', // emerald — Total Capital
+            'rgba(6,182,212,0.26)', // cyan   — Today P&L
+            'rgba(124,58,237,0.26)', // violet — Today ROI
+            'rgba(245,158,11,0.24)', // amber  — Month P&L
+            'rgba(148,163,184,0.20)', // slate  — Month ROI
+          ],
+        },
+      };
 
-const DEFAULT_TYPES = [
-    { id:'daily',   name:"Today's Overview" },
-    { id:'monthly', name:'Monthly Overview' },
-];
+      const DEFAULT_TYPES = [
+        { id: 'daily', name: "Today's Overview" },
+        { id: 'monthly', name: 'Monthly Overview' },
+      ];
+      const DEFAULT_LOGO =
+        'https://bkstarling.github.io/p1/v1_STRATX_PNG.png';
 
-const fmtINR = v => {
-    const n = parseFloat(v); if (isNaN(n)) return '₹0';
-    const a = Math.abs(n);
-    if (a >= 10000000) return `₹${(n/10000000).toFixed(2)} Cr`;
-    if (a >= 100000)   return `₹${(n/100000).toFixed(2)} L`;
-    return `₹${n.toLocaleString('en-IN')}`;
-};
-const fmtDate = s => new Date(s).toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'});
-const plColor  = v => { const n=parseFloat(v); return n>0?'#4ade80':n<0?'#f87171':'#94a3b8'; };
-const arr      = v => { const n=parseFloat(v); return n>0?'▲':n<0?'▼':'●'; };
-const sgn      = v => parseFloat(v)>0?'+':'';
+      const fmtINR = (v) => {
+        const n = parseFloat(v);
+        if (isNaN(n)) return '₹0';
+        const a = Math.abs(n);
+        if (a >= 10000000) return `₹${(n / 10000000).toFixed(2)} Cr`;
+        if (a >= 100000) return `₹${(n / 100000).toFixed(2)} L`;
+        return `₹${n.toLocaleString('en-IN')}`;
+      };
+      const fmtDate = (s) =>
+        new Date(s).toLocaleDateString('en-IN', {
+          day: '2-digit',
+          month: 'short',
+          year: 'numeric',
+        });
+      const plColor = (v) => {
+        const n = parseFloat(v);
+        return n > 0 ? '#4ade80' : n < 0 ? '#f87171' : '#94a3b8';
+      };
+      const arr = (v) => {
+        const n = parseFloat(v);
+        return n > 0 ? '▲' : n < 0 ? '▼' : '●';
+      };
+      const sgn = (v) => (parseFloat(v) > 0 ? '+' : '');
 
-function Slider({ label, value, min, max, step=1, onChange }) {
-    return (
-        <div className="fg">
+      function Slider({ label, value, min, max, step = 1, onChange }) {
+        return (
+          <div className="fg">
             <label>{label}</label>
             <div className="fs-row">
-                <input type="range" min={min} max={max} step={step} value={value} onChange={e=>onChange(Number(e.target.value))}/>
-                <span className="fs-badge">{value}px</span>
+              <input
+                type="range"
+                min={min}
+                max={max}
+                step={step}
+                value={value}
+                onChange={(e) => onChange(Number(e.target.value))}
+              />
+              <span className="fs-badge">{value}px</span>
             </div>
-        </div>
-    );
-}
+          </div>
+        );
+      }
 
-function App() {
-    const [form, setForm] = useState({
-        date: new Date().toISOString().split('T')[0],
-        totalCapital:'120000000', todayPL:'16500', todayROI:'0.14',
-        monthPL:'424008', monthROI:'3.53',
-        disclaimer:'Personal trades for transparency only. Broker-verified, publicly accessible. Not financial advice. Trading involves risk. Past performance does not guarantee future results.'
-    });
-    const [types, setTypes]     = useState(DEFAULT_TYPES);
-    const [selType, setSelType] = useState('daily');
-    const [newName, setNewName] = useState('');
-    const [theme, setTheme]     = useState('midnight');
-    const [logo, setLogo]       = useState(null);
-    const [busy, setBusy]       = useState(false);
+      function App() {
+        const [form, setForm] = useState({
+          date: new Date().toISOString().split('T')[0],
+          totalCapital: '120000000',
+          todayPL: '16500',
+          todayROI: '0.14',
+          monthPL: '424008',
+          monthROI: '3.53',
+          disclaimer:
+            'Personal trades for transparency only. Broker-verified, publicly accessible. Not financial advice. Trading involves risk. Past performance does not guarantee future results.',
+        });
+        const [types, setTypes] = useState(DEFAULT_TYPES);
+        const [selType, setSelType] = useState('daily');
+        const [newName, setNewName] = useState('');
+        const [theme, setTheme] = useState('midnight');
+        const [logo, setLogo] = useState(DEFAULT_LOGO);
+        const [busy, setBusy] = useState(false);
 
-    /* Font sizes */
-    const [fs, setFs] = useState({ title:26, date:18, label:21, value:35, disc:10 });
-    const setF = (k,v) => setFs(p=>({...p,[k]:v}));
+        /* Font sizes */
+        const [fs, setFs] = useState({
+          title: 26,
+          date: 18,
+          label: 21,
+          value: 35,
+          disc: 10,
+        });
+        const setF = (k, v) => setFs((p) => ({ ...p, [k]: v }));
 
-    const ref = useRef(null);
-    const set = (k,v) => setForm(p=>({...p,[k]:v}));
+        const ref = useRef(null);
+        const set = (k, v) => setForm((p) => ({ ...p, [k]: v }));
 
-    const addType = () => {
-        const name=newName.trim(); if(!name) return;
-        const id='c'+Date.now();
-        setTypes(p=>[...p,{id,name}]);
-        setSelType(id); setNewName('');
-    };
-    const delType = id => { setTypes(p=>p.filter(t=>t.id!==id)); if(selType===id) setSelType('daily'); };
-    const handleLogo = e => { const f=e.target.files[0]; if(!f) return; const r=new FileReader(); r.onloadend=()=>setLogo(r.result); r.readAsDataURL(f); };
+        const addType = () => {
+          const name = newName.trim();
+          if (!name) return;
+          const id = 'c' + Date.now();
+          setTypes((p) => [...p, { id, name }]);
+          setSelType(id);
+          setNewName('');
+        };
+        const delType = (id) => {
+          setTypes((p) => p.filter((t) => t.id !== id));
+          if (selType === id) setSelType('daily');
+        };
+        const handleLogo = (e) => {
+          const f = e.target.files[0];
+          if (!f) return;
+          const r = new FileReader();
+          r.onloadend = () => setLogo(r.result);
+          r.readAsDataURL(f);
+        };
 
-    const download = async () => {
-        if(!ref.current) return; setBusy(true);
-        try {
-            const c=await html2canvas(ref.current,{scale:4,backgroundColor:null,logging:false,useCORS:true,allowTaint:true});
-            const a=document.createElement('a'); a.download=`STRATX_${form.date}.png`; a.href=c.toDataURL('image/png'); a.click();
-        } catch(e){ alert('Export failed. Please try again.'); }
-        finally { setBusy(false); }
-    };
+        const download = async () => {
+          if (!ref.current) return;
+          setBusy(true);
+          try {
+            const c = await html2canvas(ref.current, {
+              scale: 4,
+              backgroundColor: null,
+              logging: false,
+              useCORS: true,
+              allowTaint: true,
+            });
+            const a = document.createElement('a');
+            a.download = `STRATX_${form.date}.png`;
+            a.href = c.toDataURL('image/png');
+            a.click();
+          } catch (e) {
+            alert('Export failed. Please try again.');
+          } finally {
+            setBusy(false);
+          }
+        };
 
-    const T = THEMES[theme];
-    const typeName = types.find(t=>t.id===selType)?.name || "Today's Overview";
+        const T = THEMES[theme];
+        const typeName =
+          types.find((t) => t.id === selType)?.name || "Today's Overview";
 
-    const cards = [
-        { key:'cap',  label:'Total Capital',  value:fmtINR(form.totalCapital), raw:form.totalCapital, isPL:false, wide:true  },
-        { key:'tpl',  label:"Today's P&L",    value:`${sgn(form.todayPL)}${fmtINR(form.todayPL)}`,  raw:form.todayPL,  isPL:true, wide:false },
-        { key:'troi', label:"Today's ROI",    value:`${sgn(form.todayROI)}${form.todayROI}%`,        raw:form.todayROI, isPL:true, wide:false },
-        { key:'mpl',  label:'Month P&L',      value:`${sgn(form.monthPL)}${fmtINR(form.monthPL)}`,   raw:form.monthPL,  isPL:true, wide:false },
-        { key:'mroi', label:'Month ROI',      value:`${sgn(form.monthROI)}${form.monthROI}%`,         raw:form.monthROI, isPL:true, wide:false },
-    ];
+        const cards = [
+          {
+            key: 'cap',
+            label: 'Total Capital',
+            value: fmtINR(form.totalCapital),
+            raw: form.totalCapital,
+            isPL: false,
+            wide: true,
+          },
+          {
+            key: 'tpl',
+            label: "Today's P&L",
+            value: `${sgn(form.todayPL)}${fmtINR(form.todayPL)}`,
+            raw: form.todayPL,
+            isPL: true,
+            wide: false,
+          },
+          {
+            key: 'troi',
+            label: "Today's ROI",
+            value: `${sgn(form.todayROI)}${form.todayROI}%`,
+            raw: form.todayROI,
+            isPL: true,
+            wide: false,
+          },
+          {
+            key: 'mpl',
+            label: 'Month P&L',
+            value: `${sgn(form.monthPL)}${fmtINR(form.monthPL)}`,
+            raw: form.monthPL,
+            isPL: true,
+            wide: false,
+          },
+          {
+            key: 'mroi',
+            label: 'Month ROI',
+            value: `${sgn(form.monthROI)}${form.monthROI}%`,
+            raw: form.monthROI,
+            isPL: true,
+            wide: false,
+          },
+        ];
 
-    return (
-        <div className="app">
+        return (
+          <div className="app">
             {/* ── SIDEBAR ── */}
             <div className="sidebar">
-                <div className="s-head">
-                    <h1>📊 STRATX Report Generator</h1>
-                    <p>Create professional trading report cards</p>
-                </div>
-                <div className="s-body">
-
-                    {/* Report Type */}
-                    <div className="fc">
-                        <div className="fc-title">Report Type</div>
-                        <div className="type-list">
-                            {types.map(t=>(
-                                <div key={t.id} className={`type-item ${selType===t.id?'sel':''}`}>
-                                    <div className="type-dot" style={{background:selType===t.id?'#3b82f6':'#384e6e'}}/>
-                                    <button className="type-btn" onClick={()=>setSelType(t.id)}>{t.name}</button>
-                                    {!['daily','monthly'].includes(t.id) && <button className="type-del" onClick={()=>delType(t.id)}>×</button>}
-                                </div>
-                            ))}
-                        </div>
-                        <div className="add-row">
-                            <input className="add-input" placeholder="New report type name…" value={newName} onChange={e=>setNewName(e.target.value)} onKeyDown={e=>e.key==='Enter'&&addType()}/>
-                            <button className="add-btn" onClick={addType}>+ Add</button>
-                        </div>
-                        <div className="fg" style={{marginTop:'10px'}}>
-                            <label>Date</label>
-                            <input type="date" value={form.date} onChange={e=>set('date',e.target.value)}/>
-                        </div>
-                    </div>
-
-                    {/* Capital & Performance */}
-                    <div className="fc">
-                        <div className="fc-title">Capital & Performance</div>
-                        <div className="fg">
-                            <label>Total Capital (₹)</label>
-                            <input type="number" value={form.totalCapital} onChange={e=>set('totalCapital',e.target.value)} placeholder="120000000"/>
-                        </div>
-                        <div className="two">
-                            <div className="fg"><label>Today's P&L (₹)</label><input type="number" value={form.todayPL} onChange={e=>set('todayPL',e.target.value)}/></div>
-                            <div className="fg"><label>Today's ROI (%)</label><input type="number" step="0.01" value={form.todayROI} onChange={e=>set('todayROI',e.target.value)}/></div>
-                        </div>
-                        <div className="two">
-                            <div className="fg"><label>Month P&L (₹)</label><input type="number" value={form.monthPL} onChange={e=>set('monthPL',e.target.value)}/></div>
-                            <div className="fg"><label>Month ROI (%)</label><input type="number" step="0.01" value={form.monthROI} onChange={e=>set('monthROI',e.target.value)}/></div>
-                        </div>
-                    </div>
-
-                    {/* Font Sizes */}
-                    <div className="fc">
-                        <div className="fc-title">Font Sizes</div>
-                        <Slider label="Report Title" value={fs.title} min={16} max={48} onChange={v=>setF('title',v)}/>
-                        <Slider label="Date" value={fs.date} min={10} max={28} onChange={v=>setF('date',v)}/>
-                        <Slider label="Card Labels (Today's ROI, etc.)" value={fs.label} min={10} max={28} onChange={v=>setF('label',v)}/>
-                        <Slider label="Card Values (Numbers)" value={fs.value} min={16} max={48} onChange={v=>setF('value',v)}/>
-                        <Slider label="Disclaimer" value={fs.disc} min={6} max={14} onChange={v=>setF('disc',v)}/>
-                    </div>
-
-                    {/* Logo */}
-                    <div className="fc">
-                        <div className="fc-title">Logo</div>
-                        <div className="fg">
-                            <input type="file" accept="image/png,image/jpeg" onChange={handleLogo}/>
-                            <small>PNG with transparent background recommended</small>
-                        </div>
-                    </div>
-
-                    {/* Theme */}
-                    <div className="fc">
-                        <div className="fc-title">Color Theme</div>
-                        <div className="theme-grid">
-                            {Object.entries(THEMES).map(([k,t])=>(
-                                <button key={k} className={`t-btn ${theme===k?'on':''}`} onClick={()=>setTheme(k)}>
-                                    <div className="t-swatch" style={{background:t.bg}}/>
-                                    <div className="t-name">{t.name}</div>
-                                </button>
-                            ))}
-                        </div>
-                    </div>
-
-                    {/* Disclaimer */}
-                    <div className="fc">
-                        <div className="fc-title">Disclaimer</div>
-                        <div className="fg">
-                            <textarea value={form.disclaimer} onChange={e=>set('disclaimer',e.target.value)} rows="4"/>
-                        </div>
-                    </div>
-
-                    <button className="dl-btn" onClick={download} disabled={busy}>
-                        {busy?'⏳ Generating PNG…':'📥 Download Report PNG'}
+              <div className="s-head">
+                <h1>📊 STRATX Report Generator</h1>
+                <p>Create professional trading report cards</p>
+              </div>
+              <div className="s-body">
+                {/* Report Type */}
+                <div className="fc">
+                  <div className="fc-title">Report Type</div>
+                  <div className="type-list">
+                    {types.map((t) => (
+                      <div
+                        key={t.id}
+                        className={`type-item ${selType === t.id ? 'sel' : ''}`}
+                      >
+                        <div
+                          className="type-dot"
+                          style={{
+                            background:
+                              selType === t.id ? '#3b82f6' : '#384e6e',
+                          }}
+                        />
+                        <button
+                          className="type-btn"
+                          onClick={() => setSelType(t.id)}
+                        >
+                          {t.name}
+                        </button>
+                        {!['daily', 'monthly'].includes(t.id) && (
+                          <button
+                            className="type-del"
+                            onClick={() => delType(t.id)}
+                          >
+                            ×
+                          </button>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                  <div className="add-row">
+                    <input
+                      className="add-input"
+                      placeholder="New report type name…"
+                      value={newName}
+                      onChange={(e) => setNewName(e.target.value)}
+                      onKeyDown={(e) => e.key === 'Enter' && addType()}
+                    />
+                    <button className="add-btn" onClick={addType}>
+                      + Add
                     </button>
+                  </div>
+                  <div className="fg" style={{ marginTop: '10px' }}>
+                    <label>Date</label>
+                    <input
+                      type="date"
+                      value={form.date}
+                      onChange={(e) => set('date', e.target.value)}
+                    />
+                  </div>
                 </div>
+
+                {/* Capital & Performance */}
+                <div className="fc">
+                  <div className="fc-title">Capital & Performance</div>
+                  <div className="fg">
+                    <label>Total Capital (₹)</label>
+                    <input
+                      type="number"
+                      value={form.totalCapital}
+                      onChange={(e) => set('totalCapital', e.target.value)}
+                      placeholder="120000000"
+                    />
+                  </div>
+                  <div className="two">
+                    <div className="fg">
+                      <label>Today's P&L (₹)</label>
+                      <input
+                        type="number"
+                        value={form.todayPL}
+                        onChange={(e) => set('todayPL', e.target.value)}
+                      />
+                    </div>
+                    <div className="fg">
+                      <label>Today's ROI (%)</label>
+                      <input
+                        type="number"
+                        step="0.01"
+                        value={form.todayROI}
+                        onChange={(e) => set('todayROI', e.target.value)}
+                      />
+                    </div>
+                  </div>
+                  <div className="two">
+                    <div className="fg">
+                      <label>Month P&L (₹)</label>
+                      <input
+                        type="number"
+                        value={form.monthPL}
+                        onChange={(e) => set('monthPL', e.target.value)}
+                      />
+                    </div>
+                    <div className="fg">
+                      <label>Month ROI (%)</label>
+                      <input
+                        type="number"
+                        step="0.01"
+                        value={form.monthROI}
+                        onChange={(e) => set('monthROI', e.target.value)}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Font Sizes */}
+                <div className="fc">
+                  <div className="fc-title">Font Sizes</div>
+                  <Slider
+                    label="Report Title"
+                    value={fs.title}
+                    min={16}
+                    max={48}
+                    onChange={(v) => setF('title', v)}
+                  />
+                  <Slider
+                    label="Date"
+                    value={fs.date}
+                    min={10}
+                    max={28}
+                    onChange={(v) => setF('date', v)}
+                  />
+                  <Slider
+                    label="Card Labels (Today's ROI, etc.)"
+                    value={fs.label}
+                    min={10}
+                    max={28}
+                    onChange={(v) => setF('label', v)}
+                  />
+                  <Slider
+                    label="Card Values (Numbers)"
+                    value={fs.value}
+                    min={16}
+                    max={48}
+                    onChange={(v) => setF('value', v)}
+                  />
+                  <Slider
+                    label="Disclaimer"
+                    value={fs.disc}
+                    min={6}
+                    max={14}
+                    onChange={(v) => setF('disc', v)}
+                  />
+                </div>
+
+                {/* Logo */}
+                <div className="fc">
+                  <div className="fc-title">Logo</div>
+                  <div className="fg">
+                    <input
+                      type="file"
+                      accept="image/png,image/jpeg"
+                      onChange={handleLogo}
+                    />
+                    <small>PNG with transparent background recommended</small>
+                  </div>
+                </div>
+
+                {/* Theme */}
+                <div className="fc">
+                  <div className="fc-title">Color Theme</div>
+                  <div className="theme-grid">
+                    {Object.entries(THEMES).map(([k, t]) => (
+                      <button
+                        key={k}
+                        className={`t-btn ${theme === k ? 'on' : ''}`}
+                        onClick={() => setTheme(k)}
+                      >
+                        <div
+                          className="t-swatch"
+                          style={{ background: t.bg }}
+                        />
+                        <div className="t-name">{t.name}</div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Disclaimer */}
+                <div className="fc">
+                  <div className="fc-title">Disclaimer</div>
+                  <div className="fg">
+                    <textarea
+                      value={form.disclaimer}
+                      onChange={(e) => set('disclaimer', e.target.value)}
+                      rows="4"
+                    />
+                  </div>
+                </div>
+
+                <button className="dl-btn" onClick={download} disabled={busy}>
+                  {busy ? '⏳ Generating PNG…' : '📥 Download Report PNG'}
+                </button>
+              </div>
             </div>
 
             {/* ── PREVIEW ── */}
             <div className="preview">
-                <div className="p-head">
-                    <h2>Live Preview</h2>
-                    <p>Your report will look exactly like this when downloaded</p>
-                </div>
-                <div className="p-wrap">
-                    <div ref={ref} className="rc" style={{background:T.bg, color:T.textColor}}>
-
-                        {/* HEADER */}
-                        <div className="rc-hdr">
-                            {logo && <div className="rc-logo-wrap"><img src={logo} alt="Logo" className="rc-logo" crossOrigin="anonymous"/></div>}
-                            <div style={{fontFamily:"'Bebas Neue',sans-serif", fontSize:`${fs.title}px`, letterSpacing:'5px', textTransform:'uppercase', lineHeight:1, color:T.textColor}}>
-                                {typeName}
-                            </div>
-                            <div style={{fontFamily:"'JetBrains Mono',monospace", fontSize:`${fs.date}px`, fontWeight:500, letterSpacing:'0.8px', marginTop:'8px', paddingBottom:'12px', borderBottom:`1px solid ${T.dateBorder}`, opacity:0.75, color:T.textColor}}>
-                                {fmtDate(form.date)}
-                            </div>
-                        </div>
-
-                        {/* METRICS GRID */}
-                        <div className="mgrid">
-                            {cards.map((c,i)=>{
-                                const tint = T.tints[i] || T.tints[0];
-                                const arrowColor = c.isPL ? plColor(c.raw) : 'transparent';
-                                const wideValSize = Math.round(fs.value * 1.22);
-                                return (
-                                    <div key={c.key} className={`mc${c.wide?' wide':''}`}
-                                         style={{background: tint}}>
-                                        {/* label */}
-                                        <div style={{fontFamily:"'Outfit',sans-serif", fontSize:`${fs.label}px`, fontWeight:600, textTransform:'uppercase', letterSpacing:'0.8px', color:'rgba(255,255,255,0.78)'}}>
-                                            {c.label}
-                                        </div>
-                                        {/* value */}
-                                        <div style={{fontFamily:"'JetBrains Mono',monospace", fontSize:`${c.wide?wideValSize:fs.value}px`, fontWeight:600, display:'flex', alignItems:'center', gap:'7px', lineHeight:1, marginTop: c.wide?0:'10px', color:'#ffffff'}}>
-                                            {c.isPL && <span className="mc-arr" style={{color:arrowColor, fontSize:`${Math.round(fs.value*0.6)}px`}}>{arr(c.raw)}</span>}
-                                            {c.value}
-                                        </div>
-                                    </div>
-                                );
-                            })}
-                        </div>
-
-                        {/* DISCLAIMER */}
-                        <div className="rc-disc" style={{fontSize:`${fs.disc}px`}}>
-                            <strong>DISCLAIMER: </strong>{form.disclaimer}
-                        </div>
+              <div className="p-head">
+                <h2>Live Preview</h2>
+                <p>Your report will look exactly like this when downloaded</p>
+              </div>
+              <div className="p-wrap">
+                <div
+                  ref={ref}
+                  className="rc"
+                  style={{ background: T.bg, color: T.textColor }}
+                >
+                  {/* HEADER */}
+                  <div className="rc-hdr">
+                    {logo && (
+                      <div className="rc-logo-wrap">
+                        <img
+                          src={logo}
+                          alt="Logo"
+                          className="rc-logo"
+                          crossOrigin="anonymous"
+                        />
+                      </div>
+                    )}
+                    <div
+                      style={{
+                        fontFamily: "'Bebas Neue',sans-serif",
+                        fontSize: `${fs.title}px`,
+                        letterSpacing: '5px',
+                        textTransform: 'uppercase',
+                        lineHeight: 1,
+                        color: T.textColor,
+                      }}
+                    >
+                      {typeName}
                     </div>
-                </div>
-            </div>
-        </div>
-    );
-}
+                    <div
+                      style={{
+                        fontFamily: "'JetBrains Mono',monospace",
+                        fontSize: `${fs.date}px`,
+                        fontWeight: 500,
+                        letterSpacing: '0.8px',
+                        marginTop: '8px',
+                        paddingBottom: '12px',
+                        borderBottom: `1px solid ${T.dateBorder}`,
+                        opacity: 0.75,
+                        color: T.textColor,
+                      }}
+                    >
+                      {fmtDate(form.date)}
+                    </div>
+                  </div>
 
-ReactDOM.render(<App />, document.getElementById('root'));
-</script>
-</body>
+                  {/* METRICS GRID */}
+                  <div className="mgrid">
+                    {cards.map((c, i) => {
+                      const tint = T.tints[i] || T.tints[0];
+                      const arrowColor = c.isPL
+                        ? plColor(c.raw)
+                        : 'transparent';
+                      const wideValSize = Math.round(fs.value * 1.22);
+                      return (
+                        <div
+                          key={c.key}
+                          className={`mc${c.wide ? ' wide' : ''}`}
+                          style={{ background: tint }}
+                        >
+                          {/* label */}
+                          <div
+                            style={{
+                              fontFamily: "'Outfit',sans-serif",
+                              fontSize: `${fs.label}px`,
+                              fontWeight: 600,
+                              textTransform: 'uppercase',
+                              letterSpacing: '0.8px',
+                              color: 'rgba(255,255,255,0.78)',
+                            }}
+                          >
+                            {c.label}
+                          </div>
+                          {/* value */}
+                          <div
+                            style={{
+                              fontFamily: "'JetBrains Mono',monospace",
+                              fontSize: `${c.wide ? wideValSize : fs.value}px`,
+                              fontWeight: 600,
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '7px',
+                              lineHeight: 1,
+                              marginTop: c.wide ? 0 : '10px',
+                              color: '#ffffff',
+                            }}
+                          >
+                            {c.isPL && (
+                              <span
+                                className="mc-arr"
+                                style={{
+                                  color: arrowColor,
+                                  fontSize: `${Math.round(fs.value * 0.6)}px`,
+                                }}
+                              >
+                                {arr(c.raw)}
+                              </span>
+                            )}
+                            {c.value}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  {/* DISCLAIMER */}
+                  <div className="rc-disc" style={{ fontSize: `${fs.disc}px` }}>
+                    <strong>DISCLAIMER: </strong>
+                    {form.disclaimer}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+      }
+
+      ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+  </body>
 </html>
