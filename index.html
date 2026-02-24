@@ -1,1011 +1,1606 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" class="scroll-smooth">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>STRATX Report Generator</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <title>StratX Algo | Systematic Index Trading Strategies India</title>
+    <meta
+      name="description"
+      content="StratX Algo delivers systematic index strategies for intraday trading. Research-driven, backtested algo trading platform for disciplined capital allocation in India."
+    />
+    <meta
+      name="keywords"
+      content="systematic trading, index strategies, algo trading India, risk management trading, intraday algo, backtesting platform, NSE algo trading"
+    />
     <link
-      href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap"
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.1/css/all.min.css"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap"
       rel="stylesheet"
     />
-    <script
-      crossorigin
-      src="https://unpkg.com/react@18/umd/react.production.min.js"
-    ></script>
-    <script
-      crossorigin
-      src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"
-    ></script>
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%2310b981'/%3E%3Ctext x='16' y='21' font-size='13' font-family='DM Sans,Arial,Helvetica,sans-serif' fill='white' text-anchor='middle'%3ESA%3C/text%3E%3C/svg%3E"
+    />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            fontFamily: {
+              display: ['Syne', 'sans-serif'],
+              mono: ['DM Mono', 'monospace'],
+              body: ['DM Sans', 'sans-serif'],
+            },
+            colors: {
+              brand: {
+                green: '#16a34a',
+                lime: '#22c55e',
+                blue: '#3b82f6',
+                cyan: '#06b6d4',
+              },
+            },
+            animation: {
+              ticker: 'ticker 30s linear infinite',
+              'pulse-slow': 'pulse 4s ease-in-out infinite',
+              'fade-up': 'fadeUp 0.6s ease forwards',
+            },
+            keyframes: {
+              ticker: {
+                '0%': { transform: 'translateX(0)' },
+                '100%': { transform: 'translateX(-50%)' },
+              },
+              fadeUp: {
+                from: { opacity: 0, transform: 'translateY(24px)' },
+                to: { opacity: 1, transform: 'translateY(0)' },
+              },
+            },
+          },
+        },
+      };
+    </script>
     <style>
-      *,
-      *::before,
-      *::after {
-        margin: 0;
-        padding: 0;
+      * {
         box-sizing: border-box;
       }
-      :root {
-        --bg: #070c18;
-        --surface: #0c1526;
-        --surface2: #101d33;
-        --border: rgba(255, 255, 255, 0.06);
-        --border2: rgba(255, 255, 255, 0.1);
-        --text: #dce8f8;
-        --muted: #384e6e;
-        --dim: #7090b8;
-        --blue: #3b82f6;
-        --blue-glow: rgba(59, 130, 246, 0.18);
-      }
       body {
-        font-family: 'Outfit', sans-serif;
-        background: var(--bg);
-        color: var(--text);
-        min-height: 100vh;
-      }
-      .app {
-        display: grid;
-        grid-template-columns: 500px 1fr;
-        height: 100vh;
-      }
-
-      /* ── SIDEBAR ── */
-      .sidebar {
-        background: var(--surface);
-        border-right: 1px solid var(--border);
-        overflow-y: auto;
-        display: flex;
-        flex-direction: column;
-      }
-      .sidebar::-webkit-scrollbar {
-        width: 4px;
-      }
-      .sidebar::-webkit-scrollbar-thumb {
-        background: rgba(255, 255, 255, 0.08);
-        border-radius: 2px;
-      }
-
-      .s-head {
-        padding: 24px 24px 18px;
-        border-bottom: 1px solid var(--border);
-        background: linear-gradient(
-          180deg,
-          rgba(59, 130, 246, 0.08) 0%,
-          transparent 100%
-        );
-      }
-      .s-head h1 {
-        font-size: 17px;
-        font-weight: 700;
-        color: var(--text);
-      }
-      .s-head p {
-        font-size: 12px;
-        color: var(--muted);
-        margin-top: 3px;
-      }
-
-      .s-body {
-        padding: 16px 20px;
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-        gap: 10px;
-      }
-
-      /* FORM CARDS */
-      .fc {
-        background: var(--surface2);
-        border: 1px solid var(--border);
-        border-radius: 12px;
-        padding: 14px 16px;
-      }
-      .fc-title {
-        font-size: 10px;
-        font-weight: 700;
-        color: var(--muted);
-        text-transform: uppercase;
-        letter-spacing: 1.4px;
-        margin-bottom: 12px;
-      }
-
-      .fg {
-        margin-bottom: 9px;
-      }
-      .fg:last-child {
-        margin-bottom: 0;
-      }
-      .fg label {
-        display: block;
-        font-size: 11px;
-        font-weight: 600;
-        color: var(--dim);
-        margin-bottom: 5px;
-      }
-
-      .fg input,
-      .fg select,
-      .fg textarea {
-        width: 100%;
-        padding: 8px 11px;
-        background: var(--bg);
-        border: 1px solid var(--border2);
-        border-radius: 8px;
-        font-size: 13px;
-        font-family: 'Outfit', sans-serif;
-        color: var(--text);
+        font-family: 'DM Sans', sans-serif;
         transition:
-          border-color 0.15s,
-          box-shadow 0.15s;
+          background 0.3s,
+          color 0.3s;
       }
-      .fg input[type='number'],
-      .fg input[type='date'] {
-        font-family: 'JetBrains Mono', monospace;
-        font-size: 12px;
+      h1,
+      h2,
+      h3,
+      h4 {
+        font-family: 'Syne', sans-serif;
       }
-      .fg input[type='range'] {
-        padding: 4px 0;
-        background: none;
-        border: none;
-        accent-color: var(--blue);
-        cursor: pointer;
-      }
-      .fg input[type='range']:focus {
-        box-shadow: none;
-      }
-      .fg input:focus,
-      .fg select:focus,
-      .fg textarea:focus {
-        outline: none;
-        border-color: var(--blue);
-        box-shadow: 0 0 0 3px var(--blue-glow);
-      }
-      .fg select option {
-        background: #0c1526;
-      }
-      .fg small {
-        display: block;
-        margin-top: 4px;
-        font-size: 10px;
-        color: var(--muted);
-      }
-      .two {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 9px;
+      .mono {
+        font-family: 'DM Mono', monospace;
       }
 
-      /* Font size row */
-      .fs-row {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-      }
-      .fs-row input[type='range'] {
-        flex: 1;
-      }
-      .fs-badge {
-        font-family: 'JetBrains Mono', monospace;
-        font-size: 11px;
-        color: var(--blue);
-        min-width: 30px;
-        text-align: right;
-      }
-
-      /* TYPE MANAGER */
-      .type-list {
-        display: flex;
-        flex-direction: column;
-        gap: 6px;
-        margin-bottom: 10px;
-      }
-      .type-item {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        padding: 7px 10px;
-        background: var(--bg);
-        border: 1px solid var(--border);
-        border-radius: 8px;
-        transition:
-          border-color 0.15s,
-          background 0.15s;
-      }
-      .type-item.sel {
-        border-color: rgba(59, 130, 246, 0.4);
-        background: rgba(59, 130, 246, 0.08);
-      }
-      .type-dot {
-        width: 7px;
-        height: 7px;
-        border-radius: 50%;
-        flex-shrink: 0;
-      }
-      .type-btn {
-        background: none;
-        border: none;
-        cursor: pointer;
-        flex: 1;
-        text-align: left;
-        font-size: 12px;
-        font-weight: 500;
-        font-family: 'Outfit', sans-serif;
-        color: var(--dim);
-      }
-      .type-item.sel .type-btn {
-        color: var(--text);
-      }
-      .type-del {
-        background: none;
-        border: none;
-        color: var(--muted);
-        cursor: pointer;
-        font-size: 15px;
-        padding: 0 2px;
-        line-height: 1;
-        transition: color 0.15s;
-      }
-      .type-del:hover {
-        color: #f87171;
-      }
-      .add-row {
-        display: flex;
-        gap: 7px;
-      }
-      .add-input {
-        flex: 1;
-        padding: 8px 11px;
-        background: var(--bg);
-        border: 1px solid var(--border2);
-        border-radius: 8px;
-        font-size: 12px;
-        font-family: 'Outfit', sans-serif;
-        color: var(--text);
-      }
-      .add-input:focus {
-        outline: none;
-        border-color: var(--blue);
-      }
-      .add-btn {
-        padding: 8px 13px;
-        background: var(--blue);
-        color: #fff;
-        border: none;
-        border-radius: 8px;
-        font-size: 12px;
-        font-weight: 600;
-        cursor: pointer;
-        font-family: 'Outfit', sans-serif;
-        transition: background 0.15s;
-        white-space: nowrap;
-      }
-      .add-btn:hover {
-        background: #2563eb;
-      }
-
-      /* THEME */
-      .theme-grid {
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 8px;
-      }
-      .t-btn {
-        border: 2px solid var(--border);
-        border-radius: 10px;
-        background: none;
-        cursor: pointer;
+      /* Candlestick SVG background - single large watermark */
+      .candle-bg {
+        position: relative;
         overflow: hidden;
-        padding: 0;
+      }
+      .candle-bg::before {
+        display: none;
+      }
+
+      /* Glassmorphism card */
+      .glass-card {
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+      }
+
+      /* Info strip scroll */
+      #info-strip {
+        min-width: max-content;
+        animation: ticker 40s linear infinite;
+        will-change: transform;
+      }
+      #info-strip > span {
+        min-width: max-content;
+        display: inline-flex;
+      }
+
+      /* Hamburger */
+      #mobile-menu {
+        display: none;
+      }
+      #mobile-menu.open {
+        display: block;
+      }
+
+      /* Modal */
+      #modal-overlay {
+        display: none;
+      }
+      #modal-overlay.open {
+        display: flex;
+      }
+
+      /* Chart line animation */
+      .chart-path {
+        stroke-dasharray: 400;
+        stroke-dashoffset: 400;
+        animation: drawLine 2.5s ease forwards 0.5s;
+      }
+      @keyframes ticker {
+        0% {
+          transform: translateX(0);
+        }
+        100% {
+          transform: translateX(-50%);
+        }
+      }
+
+      @keyframes drawLine {
+        to {
+          stroke-dashoffset: 0;
+        }
+      }
+
+      /* Fixed CTA bar on mobile */
+      @media (max-width: 768px) {
+        #fixed-cta {
+          display: flex;
+        }
+      }
+      #fixed-cta {
+        display: none;
+      }
+
+      .section-fade {
+        opacity: 0;
+        transform: translateY(30px);
         transition:
-          border-color 0.15s,
-          box-shadow 0.15s;
+          opacity 0.7s ease,
+          transform 0.7s ease;
       }
-      .t-btn:hover {
-        border-color: var(--border2);
-      }
-      .t-btn.on {
-        border-color: var(--blue);
-        box-shadow: 0 0 0 3px var(--blue-glow);
-      }
-      .t-swatch {
-        height: 34px;
-        width: 100%;
-      }
-      .t-name {
-        padding: 5px 4px;
-        font-size: 9px;
-        font-weight: 600;
-        color: var(--muted);
-        text-align: center;
-        background: var(--bg);
-      }
-      .t-btn.on .t-name {
-        color: #60a5fa;
-      }
-
-      /* DOWNLOAD */
-      .dl-btn {
-        width: 100%;
-        padding: 13px;
-        background: linear-gradient(135deg, #3b82f6, #2563eb);
-        color: #fff;
-        border: none;
-        border-radius: 10px;
-        font-size: 14px;
-        font-weight: 700;
-        font-family: 'Outfit', sans-serif;
-        cursor: pointer;
-        letter-spacing: 0.3px;
-        transition: all 0.2s;
-        margin-top: 4px;
-      }
-      .dl-btn:hover:not(:disabled) {
-        background: linear-gradient(135deg, #2563eb, #1d4ed8);
-        box-shadow: 0 8px 24px rgba(59, 130, 246, 0.35);
-        transform: translateY(-1px);
-      }
-      .dl-btn:disabled {
-        opacity: 0.45;
-        cursor: not-allowed;
-      }
-
-      /* PREVIEW */
-      .preview {
-        background: #04080f;
-        overflow-y: auto;
-        display: flex;
-        flex-direction: column;
-        padding: 36px 40px;
-      }
-      .preview::-webkit-scrollbar {
-        width: 4px;
-      }
-      .preview::-webkit-scrollbar-thumb {
-        background: rgba(255, 255, 255, 0.08);
-        border-radius: 2px;
-      }
-      .p-head {
-        margin-bottom: 24px;
-      }
-      .p-head h2 {
-        font-size: 16px;
-        font-weight: 700;
-      }
-      .p-head p {
-        font-size: 12px;
-        color: var(--muted);
-        margin-top: 2px;
-      }
-      .p-wrap {
-        flex: 1;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-      }
-
-      /* ── REPORT CARD ── */
-      .rc {
-        width: 700px;
-        height: 700px;
-        padding: 30px 38px 32px;
-        display: flex;
-        flex-direction: column;
-        box-shadow: 0 40px 120px rgba(0, 0, 0, 0.85);
-      }
-
-      .rc-hdr {
-        text-align: center;
-        margin-bottom: 12px;
-      }
-      .rc-logo-wrap {
-        display: flex;
-        justify-content: center;
-        margin-bottom: 12px;
-      }
-      .rc-logo {
-        max-width: 270px;
-        max-height: 120px;
-        object-fit: contain;
-      }
-
-      /* METRICS GRID */
-      .mgrid {
-        flex: 1;
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 9px;
-        padding: 10px 0 9px;
-      }
-      .mc {
-        border-radius: 16px;
-        padding: 18px 20px;
-        display: flex;
-        flex-direction: column;
-        justify-content: space-between;
-        background: rgba(255, 255, 255, 0.07);
-        backdrop-filter: blur(16px) saturate(160%);
-        -webkit-backdrop-filter: blur(16px) saturate(160%);
-        border: 1px solid rgba(255, 255, 255, 0.12);
-      }
-      .mc.wide {
-        grid-column: span 2;
-        flex-direction: row;
-        align-items: center;
-        padding: 18px 24px;
-      }
-      .mc-arr {
-        opacity: 0.9;
-      }
-
-      /* disclaimer */
-      .rc-disc {
-        text-align: center;
-        line-height: 1.6;
-        padding: 10px 14px;
-        border-radius: 10px;
-        background: rgba(0, 0, 0, 0.22);
-        color: rgba(255, 255, 255, 0.4);
-      }
-      .rc-disc strong {
-        color: rgba(255, 255, 255, 0.6);
-        letter-spacing: 0.4px;
+      .section-fade.visible {
+        opacity: 1;
+        transform: translateY(0);
       }
     </style>
   </head>
-  <body>
-    <div id="root"></div>
-    <script type="text/babel">
-      const { useState, useRef } = React;
 
-      /* ── THEMES ── gentle gradients, glassmorphism card tints */
-      const THEMES = {
-        midnight: {
-          name: 'Midnight Blue',
-          bg: 'linear-gradient(145deg, #06101f 0%, #0d1f48 40%, #091630 70%, #050e20 100%)',
-          dateBorder: 'rgba(147,197,253,0.25)',
-          textColor: '#ddeeff',
-          /* card 0=wide total capital, 1=todayPL, 2=todayROI, 3=monthPL, 4=monthROI */
-          tints: [
-            'rgba(59,130,246,0.28)', // blue  — Total Capital
-            'rgba(124,58,237,0.30)', // violet — Today P&L
-            'rgba(20,184,166,0.28)', // teal  — Today ROI
-            'rgba(234,88,12,0.26)', // orange — Month P&L
-            'rgba(148,163,184,0.22)', // slate — Month ROI
-          ],
-        },
-        carbon: {
-          name: 'Carbon Slate',
-          bg: 'linear-gradient(145deg, #090a10 0%, #111525 40%, #0f1322 70%, #070810 100%)',
-          dateBorder: 'rgba(203,213,225,0.2)',
-          textColor: '#e2e8f5',
-          tints: [
-            'rgba(99,102,241,0.28)', // indigo — Total Capital
-            'rgba(14,165,233,0.26)', // sky   — Today P&L
-            'rgba(168,85,247,0.26)', // purple — Today ROI
-            'rgba(234,179,8,0.24)', // amber — Month P&L
-            'rgba(148,163,184,0.20)', // grey  — Month ROI
-          ],
-        },
-        obsidian: {
-          name: 'Obsidian Green',
-          bg: 'linear-gradient(145deg, #030c07 0%, #082012 40%, #061a0e 70%, #030b06 100%)',
-          dateBorder: 'rgba(52,211,153,0.25)',
-          textColor: '#cff0e2',
-          tints: [
-            'rgba(16,185,129,0.28)', // emerald — Total Capital
-            'rgba(6,182,212,0.26)', // cyan   — Today P&L
-            'rgba(124,58,237,0.26)', // violet — Today ROI
-            'rgba(245,158,11,0.24)', // amber  — Month P&L
-            'rgba(148,163,184,0.20)', // slate  — Month ROI
-          ],
-        },
-      };
+  <body
+    class="bg-white text-gray-900 dark:bg-gray-950 dark:text-gray-100"
+    id="body"
+  >
+    <!-- ═══════════════════════ NAVBAR ═══════════════════════ -->
+    <header
+      class="fixed top-0 left-0 right-0 z-50 bg-white/90 dark:bg-gray-950/90 backdrop-blur-md border-b border-gray-200 dark:border-gray-800"
+    >
+      <nav
+        class="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between"
+      >
+        <!-- Logo -->
+        <a
+          href="#home"
+          class="flex items-center gap-2"
+          aria-label="StratX Algo Home"
+        >
+          <div class="flex items-center gap-3">
+            <img
+              src="https://bkstarling.github.io/p1/v1_STRATX_PNG.png"
+              alt="StratX Algo logo"
+              class="h-10 w-auto object-contain"
+              loading="lazy"
+            />
+          </div>
+        </a>
 
-      const DEFAULT_TYPES = [
-        { id: 'daily', name: "Today's Overview" },
-        { id: 'monthly', name: 'Monthly Overview' },
-      ];
-      const DEFAULT_LOGO =
-        'https://bkstarling.github.io/p1/v1_STRATX_PNG.png';
+        <!-- Desktop nav -->
+        <ul
+          class="hidden md:flex items-center gap-6 text-sm font-medium text-gray-600 dark:text-gray-300"
+        >
+          <li>
+            <a href="#home" class="hover:text-amber-500 transition-colors"
+              >Home</a
+            >
+          </li>
+          <li>
+            <a href="#why" class="hover:text-amber-500 transition-colors"
+              >Why StratX</a
+            >
+          </li>
+          <li>
+            <a href="#features" class="hover:text-amber-500 transition-colors"
+              >Features</a
+            >
+          </li>
+          <li>
+            <a
+              href="#testimonials"
+              class="hover:text-amber-500 transition-colors"
+              >Testimonials</a
+            >
+          </li>
+          <li>
+            <a href="#contact" class="hover:text-amber-500 transition-colors"
+              >Contact</a
+            >
+          </li>
+        </ul>
 
-      const fmtINR = (v) => {
-        const n = parseFloat(v);
-        if (isNaN(n)) return '₹0';
-        const a = Math.abs(n);
-        if (a >= 10000000) return `₹${(n / 10000000).toFixed(2)} Cr`;
-        if (a >= 100000) return `₹${(n / 100000).toFixed(2)} L`;
-        return `₹${n.toLocaleString('en-IN')}`;
-      };
-      const fmtDate = (s) =>
-        new Date(s).toLocaleDateString('en-IN', {
-          day: '2-digit',
-          month: 'short',
-          year: 'numeric',
-        });
-      const plColor = (v) => {
-        const n = parseFloat(v);
-        return n > 0 ? '#4ade80' : n < 0 ? '#f87171' : '#94a3b8';
-      };
-      const arr = (v) => {
-        const n = parseFloat(v);
-        return n > 0 ? '▲' : n < 0 ? '▼' : '●';
-      };
-      const sgn = (v) => (parseFloat(v) > 0 ? '+' : '');
+        <!-- Right controls -->
+        <div class="flex items-center gap-3">
+          <!-- Theme toggle -->
+          <button
+            id="theme-toggle"
+            onclick="toggleTheme()"
+            aria-label="Toggle dark/light mode"
+            class="w-9 h-9 rounded-full border border-gray-200 dark:border-gray-700 flex items-center justify-center text-gray-500 dark:text-gray-400 hover:border-amber-500 hover:text-amber-500 transition-all"
+          >
+            <i class="fa-solid fa-sun hidden dark:block text-sm"></i>
+            <i class="fa-solid fa-moon block dark:hidden text-sm"></i>
+          </button>
+          <!-- CTA -->
+          <a
+            href="https://trade.stratxalgo.in"
+            target="_blank"
+            class="hidden md:inline-flex items-center gap-2 px-4 py-2 bg-amber-600 hover:bg-amber-500 text-white text-sm font-semibold rounded-lg transition-all shadow-lg shadow-amber-900/20"
+          >
+            <i class="fa-solid fa-bolt text-xs"></i> Trade Now
+          </a>
+          <!-- Hamburger -->
+          <button
+            id="hamburger"
+            onclick="toggleMenu()"
+            aria-label="Open menu"
+            class="md:hidden w-9 h-9 flex items-center justify-center text-gray-700 dark:text-gray-200"
+          >
+            <i class="fa-solid fa-bars text-lg" id="ham-icon"></i>
+          </button>
+        </div>
+      </nav>
 
-      function Slider({ label, value, min, max, step = 1, onChange }) {
-        return (
-          <div className="fg">
-            <label>{label}</label>
-            <div className="fs-row">
-              <input
-                type="range"
-                min={min}
-                max={max}
-                step={step}
-                value={value}
-                onChange={(e) => onChange(Number(e.target.value))}
+      <!-- Mobile menu -->
+      <div
+        id="mobile-menu"
+        class="md:hidden bg-white dark:bg-gray-950 border-t border-gray-100 dark:border-gray-800 px-4 py-4"
+      >
+        <ul
+          class="flex flex-col gap-4 text-sm font-medium text-gray-700 dark:text-gray-300"
+        >
+          <li>
+            <a
+              href="#home"
+              onclick="closeMenu()"
+              class="hover:text-amber-500 block py-1 transition-colors"
+              >Home</a
+            >
+          </li>
+          <li>
+            <a
+              href="#why"
+              onclick="closeMenu()"
+              class="hover:text-amber-500 block py-1 transition-colors"
+              >Why StratX</a
+            >
+          </li>
+          <li>
+            <a
+              href="#features"
+              onclick="closeMenu()"
+              class="hover:text-amber-500 block py-1 transition-colors"
+              >Features</a
+            >
+          </li>
+          <li>
+            <a
+              href="#testimonials"
+              onclick="closeMenu()"
+              class="hover:text-amber-500 block py-1 transition-colors"
+              >Testimonials</a
+            >
+          </li>
+          <li>
+            <a
+              href="#contact"
+              onclick="closeMenu()"
+              class="hover:text-amber-500 block py-1 transition-colors"
+              >Contact</a
+            >
+          </li>
+          <li>
+            <a
+              href="https://trade.stratxalgo.in"
+              target="_blank"
+              class="flex items-center justify-center gap-2 px-4 py-2.5 bg-amber-600 hover:bg-amber-500 text-white font-semibold rounded-lg transition-all"
+            >
+              <i class="fa-solid fa-bolt"></i> Trade Now
+            </a>
+          </li>
+        </ul>
+      </div>
+    </header>
+
+    <!-- Strategy info strip (static, relevant) -->
+    <div
+      class="fixed top-[57px] left-0 right-0 z-40 bg-gray-950 dark:bg-black py-1.5 border-b border-gray-800 overflow-hidden"
+    >
+      <div id="info-strip" class="flex whitespace-nowrap px-6">
+        <span class="mono text-xs text-gray-400 px-6 flex items-center gap-6">
+          <span class="text-amber-400 flex items-center gap-1.5"
+            ><svg
+              class="inline w-3 h-3"
+              fill="currentColor"
+              viewBox="0 0 20 20"
+            >
+              <path
+                fill-rule="evenodd"
+                d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                clip-rule="evenodd"
               />
-              <span className="fs-badge">{value}px</span>
+            </svg>
+            NIFTY 50 Index · Intraday · Basket Deployed</span
+          >
+          <span class="text-gray-600">|</span>
+          <span class="text-blue-400 flex items-center gap-1.5"
+            ><svg
+              class="inline w-3 h-3"
+              fill="currentColor"
+              viewBox="0 0 20 20"
+            >
+              <path
+                fill-rule="evenodd"
+                d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                clip-rule="evenodd"
+              />
+            </svg>
+            Sensex Index · Risk-Defined · Auto-Execution</span
+          >
+          <span class="text-gray-600">|</span>
+          <span class="text-yellow-400 flex items-center gap-1.5"
+            ><svg
+              class="inline w-3 h-3"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"
+              />
+            </svg>
+            Backtested across 5+ Years of NSE Index Data</span
+          >
+          <span class="text-gray-600">|</span>
+          <span class="text-amber-400"
+            >Risk Controlled Execution with Pre-defined SL Logic</span
+          >
+          <span class="text-gray-600">|</span>
+          <span class="text-blue-400"
+            >Capital Allocation Discipline · Available for ₹6L+</span
+          >
+          <span class="text-gray-600">|</span>
+          <span class="text-gray-500"
+            >trade.stratxalgo.in · Systematic Index Algo Trading</span
+          >
+        </span>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════ HERO ═══════════════════════ -->
+    <section
+      id="home"
+      class="candle-bg min-h-screen flex items-center pt-28 pb-16 bg-gradient-to-br from-gray-50 via-white to-amber-50/30 dark:from-gray-950 dark:via-gray-900 dark:to-amber-950/20"
+    >
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 relative z-10 w-full">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+          <!-- Left: Text -->
+          <div class="section-fade">
+            <div
+              class="inline-flex items-center gap-2 px-3 py-1.5 bg-amber-100 dark:bg-amber-900/30 rounded-full mb-6 border border-amber-200 dark:border-amber-800"
+            >
+              <span
+                class="w-2 h-2 rounded-full bg-amber-500 animate-pulse-slow inline-block"
+              ></span>
+              <span
+                class="mono text-xs text-amber-700 dark:text-amber-400 font-medium"
+                >LIVE ALGO STRATEGIES</span
+              >
+            </div>
+
+            <h1
+              class="text-4xl sm:text-5xl lg:text-6xl font-800 leading-tight tracking-tight mb-5 font-display"
+            >
+              Trade With <span class="text-amber-500">Structure.</span><br />
+              Not<br />
+              <span class="italic text-gray-400 dark:text-gray-500"
+                >Emotion.</span
+              ><br />
+              <span
+                class="text-2xl sm:text-3xl lg:text-4xl text-gray-600 dark:text-gray-400 font-600"
+                >Capital Deserves Discipline.</span
+              >
+            </h1>
+
+            <p
+              class="text-base sm:text-lg text-gray-600 dark:text-gray-400 leading-relaxed max-w-xl mb-8"
+            >
+              STRATX ALGO delivers systematic index strategies designed to
+              complement existing equity portfolios and enhance capital
+              efficiency. Research-driven, with integrated backtesting,
+              execution, and forward deployment within a structured capital
+              allocation and defined risk framework.
+            </p>
+
+            <div class="flex flex-col sm:flex-row gap-4">
+              <a
+                href="https://trade.stratxalgo.in"
+                target="_blank"
+                class="inline-flex items-center justify-center gap-2.5 px-7 py-4 bg-amber-600 hover:bg-amber-500 text-white font-display font-700 text-base rounded-xl transition-all shadow-xl shadow-amber-900/30 hover:scale-105 hover:shadow-2xl hover:shadow-amber-900/40"
+              >
+                <i class="fa-solid fa-bolt"></i>
+                Explore Baskets & Tiers
+                <i class="fa-solid fa-arrow-right text-xs opacity-70"></i>
+              </a>
+              <button
+                onclick="openModal()"
+                class="inline-flex items-center justify-center gap-2 px-6 py-4 border border-gray-300 dark:border-gray-700 hover:border-amber-500 text-gray-700 dark:text-gray-300 hover:text-amber-600 dark:hover:text-amber-400 font-semibold rounded-xl transition-all"
+              >
+                <i class="fa-regular fa-calendar text-sm"></i>
+                Book Strategy Discussion
+              </button>
+            </div>
+
+            <div
+              class="flex flex-wrap gap-6 mt-10 pt-8 border-t border-gray-200 dark:border-gray-800"
+            >
+              <div>
+                <div class="mono text-2xl font-bold text-amber-500">100+</div>
+                <div class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                  Active Traders
+                </div>
+              </div>
+              <div class="w-px bg-gray-200 dark:bg-gray-800"></div>
+              <div>
+                <div class="mono text-2xl font-bold text-blue-500">99.9%</div>
+                <div class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                  Uptime
+                </div>
+              </div>
+              <div class="w-px bg-gray-200 dark:bg-gray-800"></div>
+              <div>
+                <div class="mono text-2xl font-bold text-amber-500">₹6L+</div>
+                <div class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                  Min Capital
+                </div>
+              </div>
+              <div class="w-px bg-gray-200 dark:bg-gray-800"></div>
+              <div>
+                <div class="mono text-2xl font-bold text-blue-500">5+ Yrs</div>
+                <div class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                  Backtested Data
+                </div>
+              </div>
             </div>
           </div>
-        );
-      }
 
-      function App() {
-        const [form, setForm] = useState({
-          date: new Date().toISOString().split('T')[0],
-          totalCapital: '120000000',
-          todayPL: '16500',
-          todayROI: '0.14',
-          monthPL: '424008',
-          monthROI: '3.53',
-          disclaimer:
-            'Personal trades for transparency only. Broker-verified, publicly accessible. Not financial advice. Trading involves risk. Past performance does not guarantee future results.',
-        });
-        const [types, setTypes] = useState(DEFAULT_TYPES);
-        const [selType, setSelType] = useState('daily');
-        const [newName, setNewName] = useState('');
-        const [theme, setTheme] = useState('midnight');
-        const [logo, setLogo] = useState(DEFAULT_LOGO);
-        const [busy, setBusy] = useState(false);
-
-        /* Font sizes */
-        const [fs, setFs] = useState({
-          title: 26,
-          date: 18,
-          label: 21,
-          value: 35,
-          disc: 10,
-        });
-        const setF = (k, v) => setFs((p) => ({ ...p, [k]: v }));
-
-        const ref = useRef(null);
-        const set = (k, v) => setForm((p) => ({ ...p, [k]: v }));
-
-        const addType = () => {
-          const name = newName.trim();
-          if (!name) return;
-          const id = 'c' + Date.now();
-          setTypes((p) => [...p, { id, name }]);
-          setSelType(id);
-          setNewName('');
-        };
-        const delType = (id) => {
-          setTypes((p) => p.filter((t) => t.id !== id));
-          if (selType === id) setSelType('daily');
-        };
-        const handleLogo = (e) => {
-          const f = e.target.files[0];
-          if (!f) return;
-          const r = new FileReader();
-          r.onloadend = () => setLogo(r.result);
-          r.readAsDataURL(f);
-        };
-
-        const download = async () => {
-          if (!ref.current) return;
-          setBusy(true);
-          try {
-            const c = await html2canvas(ref.current, {
-              scale: 4,
-              backgroundColor: null,
-              logging: false,
-              useCORS: true,
-              allowTaint: true,
-            });
-            const a = document.createElement('a');
-            a.download = `STRATX_${form.date}.png`;
-            a.href = c.toDataURL('image/png');
-            a.click();
-          } catch (e) {
-            alert('Export failed. Please try again.');
-          } finally {
-            setBusy(false);
-          }
-        };
-
-        const T = THEMES[theme];
-        const typeName =
-          types.find((t) => t.id === selType)?.name || "Today's Overview";
-
-        const cards = [
-          {
-            key: 'cap',
-            label: 'Total Capital',
-            value: fmtINR(form.totalCapital),
-            raw: form.totalCapital,
-            isPL: false,
-            wide: true,
-          },
-          {
-            key: 'tpl',
-            label: "Today's P&L",
-            value: `${sgn(form.todayPL)}${fmtINR(form.todayPL)}`,
-            raw: form.todayPL,
-            isPL: true,
-            wide: false,
-          },
-          {
-            key: 'troi',
-            label: "Today's ROI",
-            value: `${sgn(form.todayROI)}${form.todayROI}%`,
-            raw: form.todayROI,
-            isPL: true,
-            wide: false,
-          },
-          {
-            key: 'mpl',
-            label: 'Month P&L',
-            value: `${sgn(form.monthPL)}${fmtINR(form.monthPL)}`,
-            raw: form.monthPL,
-            isPL: true,
-            wide: false,
-          },
-          {
-            key: 'mroi',
-            label: 'Month ROI',
-            value: `${sgn(form.monthROI)}${form.monthROI}%`,
-            raw: form.monthROI,
-            isPL: true,
-            wide: false,
-          },
-        ];
-
-        return (
-          <div className="app">
-            {/* ── SIDEBAR ── */}
-            <div className="sidebar">
-              <div className="s-head">
-                <h1>📊 STRATX Report Generator</h1>
-                <p>Create professional trading report cards</p>
-              </div>
-              <div className="s-body">
-                {/* Report Type */}
-                <div className="fc">
-                  <div className="fc-title">Report Type</div>
-                  <div className="type-list">
-                    {types.map((t) => (
-                      <div
-                        key={t.id}
-                        className={`type-item ${selType === t.id ? 'sel' : ''}`}
-                      >
-                        <div
-                          className="type-dot"
-                          style={{
-                            background:
-                              selType === t.id ? '#3b82f6' : '#384e6e',
-                          }}
-                        />
-                        <button
-                          className="type-btn"
-                          onClick={() => setSelType(t.id)}
-                        >
-                          {t.name}
-                        </button>
-                        {!['daily', 'monthly'].includes(t.id) && (
-                          <button
-                            className="type-del"
-                            onClick={() => delType(t.id)}
-                          >
-                            ×
-                          </button>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                  <div className="add-row">
-                    <input
-                      className="add-input"
-                      placeholder="New report type name…"
-                      value={newName}
-                      onChange={(e) => setNewName(e.target.value)}
-                      onKeyDown={(e) => e.key === 'Enter' && addType()}
-                    />
-                    <button className="add-btn" onClick={addType}>
-                      + Add
-                    </button>
-                  </div>
-                  <div className="fg" style={{ marginTop: '10px' }}>
-                    <label>Date</label>
-                    <input
-                      type="date"
-                      value={form.date}
-                      onChange={(e) => set('date', e.target.value)}
-                    />
-                  </div>
-                </div>
-
-                {/* Capital & Performance */}
-                <div className="fc">
-                  <div className="fc-title">Capital & Performance</div>
-                  <div className="fg">
-                    <label>Total Capital (₹)</label>
-                    <input
-                      type="number"
-                      value={form.totalCapital}
-                      onChange={(e) => set('totalCapital', e.target.value)}
-                      placeholder="120000000"
-                    />
-                  </div>
-                  <div className="two">
-                    <div className="fg">
-                      <label>Today's P&L (₹)</label>
-                      <input
-                        type="number"
-                        value={form.todayPL}
-                        onChange={(e) => set('todayPL', e.target.value)}
-                      />
-                    </div>
-                    <div className="fg">
-                      <label>Today's ROI (%)</label>
-                      <input
-                        type="number"
-                        step="0.01"
-                        value={form.todayROI}
-                        onChange={(e) => set('todayROI', e.target.value)}
-                      />
-                    </div>
-                  </div>
-                  <div className="two">
-                    <div className="fg">
-                      <label>Month P&L (₹)</label>
-                      <input
-                        type="number"
-                        value={form.monthPL}
-                        onChange={(e) => set('monthPL', e.target.value)}
-                      />
-                    </div>
-                    <div className="fg">
-                      <label>Month ROI (%)</label>
-                      <input
-                        type="number"
-                        step="0.01"
-                        value={form.monthROI}
-                        onChange={(e) => set('monthROI', e.target.value)}
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                {/* Font Sizes */}
-                <div className="fc">
-                  <div className="fc-title">Font Sizes</div>
-                  <Slider
-                    label="Report Title"
-                    value={fs.title}
-                    min={16}
-                    max={48}
-                    onChange={(v) => setF('title', v)}
-                  />
-                  <Slider
-                    label="Date"
-                    value={fs.date}
-                    min={10}
-                    max={28}
-                    onChange={(v) => setF('date', v)}
-                  />
-                  <Slider
-                    label="Card Labels (Today's ROI, etc.)"
-                    value={fs.label}
-                    min={10}
-                    max={28}
-                    onChange={(v) => setF('label', v)}
-                  />
-                  <Slider
-                    label="Card Values (Numbers)"
-                    value={fs.value}
-                    min={16}
-                    max={48}
-                    onChange={(v) => setF('value', v)}
-                  />
-                  <Slider
-                    label="Disclaimer"
-                    value={fs.disc}
-                    min={6}
-                    max={14}
-                    onChange={(v) => setF('disc', v)}
-                  />
-                </div>
-
-                {/* Logo */}
-                <div className="fc">
-                  <div className="fc-title">Logo</div>
-                  <div className="fg">
-                    <input
-                      type="file"
-                      accept="image/png,image/jpeg"
-                      onChange={handleLogo}
-                    />
-                    <small>PNG with transparent background recommended</small>
-                  </div>
-                </div>
-
-                {/* Theme */}
-                <div className="fc">
-                  <div className="fc-title">Color Theme</div>
-                  <div className="theme-grid">
-                    {Object.entries(THEMES).map(([k, t]) => (
-                      <button
-                        key={k}
-                        className={`t-btn ${theme === k ? 'on' : ''}`}
-                        onClick={() => setTheme(k)}
-                      >
-                        <div
-                          className="t-swatch"
-                          style={{ background: t.bg }}
-                        />
-                        <div className="t-name">{t.name}</div>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Disclaimer */}
-                <div className="fc">
-                  <div className="fc-title">Disclaimer</div>
-                  <div className="fg">
-                    <textarea
-                      value={form.disclaimer}
-                      onChange={(e) => set('disclaimer', e.target.value)}
-                      rows="4"
-                    />
-                  </div>
-                </div>
-
-                <button className="dl-btn" onClick={download} disabled={busy}>
-                  {busy ? '⏳ Generating PNG…' : '📥 Download Report PNG'}
-                </button>
-              </div>
-            </div>
-
-            {/* ── PREVIEW ── */}
-            <div className="preview">
-              <div className="p-head">
-                <h2>Live Preview</h2>
-                <p>Your report will look exactly like this when downloaded</p>
-              </div>
-              <div className="p-wrap">
+          <!-- Right: Abstract visual space -->
+          <div class="section-fade hidden lg:block">
+            <div
+              class="relative h-96 rounded-2xl bg-gradient-to-br from-amber-50 to-yellow-50 dark:from-amber-900/20 dark:to-yellow-900/20 border border-amber-200 dark:border-yellow-800 flex items-center justify-center overflow-hidden"
+            >
+              <!-- Animated trading bars background -->
+              <div
+                class="absolute inset-0 flex items-end justify-center gap-2 px-8 opacity-40"
+              >
                 <div
-                  ref={ref}
-                  className="rc"
-                  style={{ background: T.bg, color: T.textColor }}
+                  class="w-2 h-12 bg-gradient-to-t from-amber-400 to-yellow-300 dark:from-yellow-500 dark:to-yellow-400 rounded-sm animate-pulse"
+                ></div>
+                <div
+                  class="w-2 h-16 bg-gradient-to-t from-amber-400 to-yellow-300 dark:from-yellow-500 dark:to-yellow-400 rounded-sm animate-pulse"
+                  style="animation-delay: 0.1s"
+                ></div>
+                <div
+                  class="w-2 h-20 bg-gradient-to-t from-amber-400 to-yellow-300 dark:from-yellow-500 dark:to-yellow-400 rounded-sm animate-pulse"
+                  style="animation-delay: 0.2s"
+                ></div>
+                <div
+                  class="w-2 h-14 bg-gradient-to-t from-amber-400 to-yellow-300 dark:from-yellow-500 dark:to-yellow-400 rounded-sm animate-pulse"
+                  style="animation-delay: 0.3s"
+                ></div>
+                <div
+                  class="w-2 h-24 bg-gradient-to-t from-amber-400 to-yellow-300 dark:from-yellow-500 dark:to-yellow-400 rounded-sm animate-pulse"
+                  style="animation-delay: 0.4s"
+                ></div>
+              </div>
+              <!-- Center content -->
+              <div class="relative text-center z-10">
+                <div
+                  class="text-5xl font-bold text-amber-600 dark:text-yellow-400 mb-3 font-mono"
                 >
-                  {/* HEADER */}
-                  <div className="rc-hdr">
-                    {logo && (
-                      <div className="rc-logo-wrap">
-                        <img
-                          src={logo}
-                          alt="Logo"
-                          className="rc-logo"
-                          crossOrigin="anonymous"
-                        />
-                      </div>
-                    )}
-                    <div
-                      style={{
-                        fontFamily: "'Bebas Neue',sans-serif",
-                        fontSize: `${fs.title}px`,
-                        letterSpacing: '5px',
-                        textTransform: 'uppercase',
-                        lineHeight: 1,
-                        color: T.textColor,
-                      }}
-                    >
-                      {typeName}
-                    </div>
-                    <div
-                      style={{
-                        fontFamily: "'JetBrains Mono',monospace",
-                        fontSize: `${fs.date}px`,
-                        fontWeight: 500,
-                        letterSpacing: '0.8px',
-                        marginTop: '8px',
-                        paddingBottom: '12px',
-                        borderBottom: `1px solid ${T.dateBorder}`,
-                        opacity: 0.75,
-                        color: T.textColor,
-                      }}
-                    >
-                      {fmtDate(form.date)}
-                    </div>
-                  </div>
+                  Backtested
+                </div>
+                <p
+                  class="text-gray-600 dark:text-gray-300 text-sm font-semibold"
+                >
+                  5+ Years of Live Data
+                </p>
+                <p class="text-gray-500 dark:text-gray-400 text-xs mt-2">
+                  Proven Edge Across Market Regimes
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
 
-                  {/* METRICS GRID */}
-                  <div className="mgrid">
-                    {cards.map((c, i) => {
-                      const tint = T.tints[i] || T.tints[0];
-                      const arrowColor = c.isPL
-                        ? plColor(c.raw)
-                        : 'transparent';
-                      const wideValSize = Math.round(fs.value * 1.22);
-                      return (
-                        <div
-                          key={c.key}
-                          className={`mc${c.wide ? ' wide' : ''}`}
-                          style={{ background: tint }}
-                        >
-                          {/* label */}
-                          <div
-                            style={{
-                              fontFamily: "'Outfit',sans-serif",
-                              fontSize: `${fs.label}px`,
-                              fontWeight: 600,
-                              textTransform: 'uppercase',
-                              letterSpacing: '0.8px',
-                              color: 'rgba(255,255,255,0.78)',
-                            }}
-                          >
-                            {c.label}
-                          </div>
-                          {/* value */}
-                          <div
-                            style={{
-                              fontFamily: "'JetBrains Mono',monospace",
-                              fontSize: `${c.wide ? wideValSize : fs.value}px`,
-                              fontWeight: 600,
-                              display: 'flex',
-                              alignItems: 'center',
-                              gap: '7px',
-                              lineHeight: 1,
-                              marginTop: c.wide ? 0 : '10px',
-                              color: '#ffffff',
-                            }}
-                          >
-                            {c.isPL && (
-                              <span
-                                className="mc-arr"
-                                style={{
-                                  color: arrowColor,
-                                  fontSize: `${Math.round(fs.value * 0.6)}px`,
-                                }}
-                              >
-                                {arr(c.raw)}
-                              </span>
-                            )}
-                            {c.value}
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
+    <!-- ═══════════════════════ WHY STRATX ═══════════════════════ -->
+    <section id="why" class="py-20 bg-gray-50 dark:bg-gray-900">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6">
+        <div class="text-center mb-14 section-fade">
+          <span
+            class="mono text-xs text-amber-600 dark:text-amber-400 uppercase tracking-widest"
+            >The Problem</span
+          >
+          <h2 class="text-3xl sm:text-4xl font-display font-700 mt-2 mb-4">
+            Why Most Traders Fail
+            <span class="text-amber-500">and How We Fix It</span>
+          </h2>
+          <p
+            class="text-gray-500 dark:text-gray-400 max-w-xl mx-auto text-base"
+          >
+            Retail traders lose not because markets are unfair, but because
+            decisions are driven by fear, greed, and inconsistency.
+          </p>
+        </div>
 
-                  {/* DISCLAIMER */}
-                  <div className="rc-disc" style={{ fontSize: `${fs.disc}px` }}>
-                    <strong>DISCLAIMER: </strong>
-                    {form.disclaimer}
-                  </div>
+        <div
+          class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-14 section-fade"
+        >
+          <!-- Problem cards -->
+          <div
+            class="bg-white dark:bg-gray-800 rounded-2xl p-6 border border-gray-100 dark:border-gray-700 hover:border-red-300 dark:hover:border-red-800 transition-all group"
+          >
+            <div
+              class="w-10 h-10 bg-red-100 dark:bg-red-900/30 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform"
+            >
+              <i class="fa-solid fa-brain text-red-500 text-base"></i>
+            </div>
+            <h3 class="font-display font-700 text-base mb-2">
+              Emotional Decisions
+            </h3>
+            <p class="text-sm text-gray-500 dark:text-gray-400 leading-relaxed">
+              FOMO entries, panic exits, and revenge trading destroy capital
+              systematically over time.
+            </p>
+          </div>
+          <div
+            class="bg-white dark:bg-gray-800 rounded-2xl p-6 border border-gray-100 dark:border-gray-700 hover:border-amber-300 dark:hover:border-amber-800 transition-all group"
+          >
+            <div
+              class="w-10 h-10 bg-amber-100 dark:bg-amber-900/30 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform"
+            >
+              <i class="fa-solid fa-shuffle text-amber-500 text-base"></i>
+            </div>
+            <h3 class="font-display font-700 text-base mb-2">
+              Inconsistent Execution
+            </h3>
+            <p class="text-sm text-gray-500 dark:text-gray-400 leading-relaxed">
+              Manual trading is riddled with delays, hesitation, and skipped
+              signals from strategy drift.
+            </p>
+          </div>
+          <div
+            class="bg-white dark:bg-gray-800 rounded-2xl p-6 border border-gray-100 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-800 transition-all group"
+          >
+            <div
+              class="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform"
+            >
+              <i class="fa-solid fa-rupee-sign text-blue-500 text-base"></i>
+            </div>
+            <h3 class="font-display font-700 text-base mb-2">
+              Poor Capital Allocation
+            </h3>
+            <p class="text-sm text-gray-500 dark:text-gray-400 leading-relaxed">
+              Over-concentration in single trades and no position-sizing
+              discipline leads to oversized losses.
+            </p>
+          </div>
+          <div
+            class="bg-white dark:bg-gray-800 rounded-2xl p-6 border border-gray-100 dark:border-gray-700 hover:border-yellow-300 dark:hover:border-yellow-800 transition-all group"
+          >
+            <div
+              class="w-10 h-10 bg-yellow-100 dark:bg-yellow-900/30 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform"
+            >
+              <i
+                class="fa-solid fa-triangle-exclamation text-yellow-500 text-base"
+              ></i>
+            </div>
+            <h3 class="font-display font-700 text-base mb-2">
+              Undefined Risk Exposure
+            </h3>
+            <p class="text-sm text-gray-500 dark:text-gray-400 leading-relaxed">
+              No pre-defined drawdown limits, no stop logic - just hope
+              masquerading as a trading strategy.
+            </p>
+          </div>
+        </div>
+
+        <!-- Solution strip -->
+        <div
+          class="bg-gradient-to-r from-amber-600 to-emerald-700 rounded-2xl p-8 text-white text-center section-fade"
+        >
+          <i class="fa-solid fa-check-circle text-3xl mb-3 opacity-90"></i>
+          <h3 class="font-display font-700 text-xl mb-2">
+            StratX Algo Solves This - Systematically
+          </h3>
+          <p class="text-amber-100 text-sm max-w-xl mx-auto mb-6">
+            We remove human bias with rules-based execution, pre-defined risk
+            per trade, and a basket deployment model - so your capital works for
+            you, not against you.
+          </p>
+          <button
+            onclick="openModal()"
+            class="inline-flex items-center gap-2 px-6 py-3 bg-white text-amber-700 font-display font-700 rounded-xl hover:bg-amber-50 transition-all shadow-lg"
+          >
+            <i class="fa-regular fa-calendar"></i>
+            Book Strategy Discussion
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════════════════ FEATURES ═══════════════════════ -->
+    <section id="features" class="py-20 bg-white dark:bg-gray-950 candle-bg">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 relative z-10">
+        <div class="text-center mb-14 section-fade">
+          <span
+            class="mono text-xs text-blue-600 dark:text-blue-400 uppercase tracking-widest"
+            >What Makes Us Different</span
+          >
+          <h2
+            class="text-2xl sm:text-3xl font-display font-600 mt-2 text-gray-700 dark:text-gray-300"
+          >
+            Built for Systematic <span class="text-blue-500">Capital.</span>
+          </h2>
+        </div>
+
+        <div
+          class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6 section-fade max-w-4xl mx-auto"
+        >
+          <div
+            class="group bg-gray-50 dark:bg-gray-900 rounded-2xl p-7 border border-gray-100 dark:border-gray-800 hover:border-amber-400 dark:hover:border-amber-700 hover:shadow-xl hover:shadow-amber-900/10 transition-all"
+          >
+            <div
+              class="w-12 h-12 bg-amber-100 dark:bg-amber-900/40 rounded-xl flex items-center justify-center mb-5 group-hover:scale-110 transition-transform"
+            >
+              <i
+                class="fa-solid fa-chart-line text-amber-600 dark:text-amber-400 text-lg"
+              ></i>
+            </div>
+            <h3 class="font-display font-700 text-lg mb-2">
+              Backtested Across 5+ Years
+            </h3>
+            <p class="text-sm text-gray-500 dark:text-gray-400 leading-relaxed">
+              All NIFTY 50 and Sensex strategies validated against 5+ years of
+              historical NSE index data. Proven edge across multiple market
+              regimes.
+            </p>
+            <div
+              class="mt-4 flex items-center gap-1.5 text-xs text-amber-600 dark:text-amber-400 font-medium"
+            >
+              <i class="fa-solid fa-check-circle"></i> Historical validation
+            </div>
+          </div>
+
+          <div
+            class="group bg-gray-50 dark:bg-gray-900 rounded-2xl p-7 border border-gray-100 dark:border-gray-800 hover:border-blue-400 dark:hover:border-blue-700 hover:shadow-xl hover:shadow-blue-900/10 transition-all"
+          >
+            <div
+              class="w-12 h-12 bg-blue-100 dark:bg-blue-900/40 rounded-xl flex items-center justify-center mb-5 group-hover:scale-110 transition-transform"
+            >
+              <i
+                class="fa-solid fa-shield-halved text-blue-600 dark:text-blue-400 text-lg"
+              ></i>
+            </div>
+            <h3 class="font-display font-700 text-lg mb-2">
+              Risk Controlled Execution
+            </h3>
+            <p class="text-sm text-gray-500 dark:text-gray-400 leading-relaxed">
+              Pre-defined stop-loss logic on every position. Daily loss limits
+              enforce capital preservation. Your downside is always controlled.
+            </p>
+            <div
+              class="mt-4 flex items-center gap-1.5 text-xs text-blue-600 dark:text-blue-400 font-medium"
+            >
+              <i class="fa-solid fa-check-circle"></i> Defined SL logic
+            </div>
+          </div>
+
+          <div
+            class="group bg-gray-50 dark:bg-gray-900 rounded-2xl p-7 border border-gray-100 dark:border-gray-800 hover:border-amber-400 dark:hover:border-amber-700 hover:shadow-xl hover:shadow-amber-900/10 transition-all"
+          >
+            <div
+              class="w-12 h-12 bg-amber-100 dark:bg-amber-900/40 rounded-xl flex items-center justify-center mb-5 group-hover:scale-110 transition-transform"
+            >
+              <i
+                class="fa-solid fa-gauge text-amber-600 dark:text-amber-400 text-lg"
+              ></i>
+            </div>
+            <h3 class="font-display font-700 text-lg mb-2">
+              Multi Regime Design
+            </h3>
+            <p class="text-sm text-gray-500 dark:text-gray-400 leading-relaxed">
+              Strategies adapt across trending, range-bound, and high-volatility
+              markets. Not locked to a single regime - systematic across
+              conditions.
+            </p>
+            <div
+              class="mt-4 flex items-center gap-1.5 text-xs text-amber-600 dark:text-amber-400 font-medium"
+            >
+              <i class="fa-solid fa-check-circle"></i> Regime-adaptive
+            </div>
+          </div>
+
+          <div
+            class="group bg-gray-50 dark:bg-gray-900 rounded-2xl p-7 border border-gray-100 dark:border-gray-800 hover:border-blue-400 dark:hover:border-blue-700 hover:shadow-xl hover:shadow-blue-900/10 transition-all"
+          >
+            <div
+              class="w-12 h-12 bg-blue-100 dark:bg-blue-900/40 rounded-xl flex items-center justify-center mb-5 group-hover:scale-110 transition-transform"
+            >
+              <i
+                class="fa-solid fa-layer-group text-blue-600 dark:text-blue-400 text-lg"
+              ></i>
+            </div>
+            <h3 class="font-display font-700 text-lg mb-2">
+              Tiered Capital Access
+            </h3>
+            <p class="text-sm text-gray-500 dark:text-gray-400 leading-relaxed">
+              Start with ₹6L and scale to 10L, 15L, or 25L+. Each tier optimizes
+              position sizing and capital allocation discipline across your
+              portfolio.
+            </p>
+            <div
+              class="mt-4 flex items-center gap-1.5 text-xs text-blue-600 dark:text-blue-400 font-medium"
+            >
+              <i class="fa-solid fa-check-circle"></i> Tiered scaling
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════════════════ TESTIMONIALS ═══════════════════════ -->
+    <section id="testimonials" class="py-20 bg-gray-50 dark:bg-gray-900">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6">
+        <div class="text-center mb-14 section-fade">
+          <span
+            class="mono text-xs text-amber-600 dark:text-amber-400 uppercase tracking-widest"
+            >Testimonials</span
+          >
+          <h2 class="text-3xl sm:text-4xl font-display font-700 mt-2">
+            Traders Who
+            <span class="text-amber-500">Switched to Structure</span>
+          </h2>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 section-fade">
+          <!-- Testimonial 1 -->
+          <div
+            class="bg-white dark:bg-gray-800 rounded-2xl p-7 border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-lg transition-all"
+          >
+            <div class="flex gap-1 mb-4">
+              <i class="fa-solid fa-star text-amber-400 text-sm"></i>
+              <i class="fa-solid fa-star text-amber-400 text-sm"></i>
+              <i class="fa-solid fa-star text-amber-400 text-sm"></i>
+              <i class="fa-solid fa-star text-amber-400 text-sm"></i>
+              <i class="fa-solid fa-star text-amber-400 text-sm"></i>
+            </div>
+            <i
+              class="fa-solid fa-quote-left text-amber-200 dark:text-amber-900 text-4xl mb-3 block"
+            ></i>
+            <p
+              class="text-gray-700 dark:text-gray-300 text-base leading-relaxed mb-6"
+            >
+              "StratX transformed my trading completely. I used to stare at
+              screens for 6 hours holding losses emotionally. Now the system
+              handles execution and I just review P&L at end of day. No more
+              sleepless nights."
+            </p>
+            <div class="flex items-center gap-3">
+              <div
+                class="w-10 h-10 bg-gradient-to-br from-amber-400 to-emerald-600 rounded-full flex items-center justify-center text-white font-bold font-display"
+              >
+                R
+              </div>
+              <div>
+                <div class="font-semibold text-sm font-display">
+                  Rohan Sharma
+                </div>
+                <div class="text-xs text-gray-400 mono">
+                  Mumbai · ₹15L Capital · 11 Months
                 </div>
               </div>
             </div>
           </div>
+
+          <!-- Testimonial 2 -->
+          <div
+            class="bg-white dark:bg-gray-800 rounded-2xl p-7 border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-lg transition-all"
+          >
+            <div class="flex gap-1 mb-4">
+              <i class="fa-solid fa-star text-amber-400 text-sm"></i>
+              <i class="fa-solid fa-star text-amber-400 text-sm"></i>
+              <i class="fa-solid fa-star text-amber-400 text-sm"></i>
+              <i class="fa-solid fa-star text-amber-400 text-sm"></i>
+              <i class="fa-solid fa-star text-amber-400 text-sm"></i>
+            </div>
+            <i
+              class="fa-solid fa-quote-left text-blue-200 dark:text-blue-900 text-4xl mb-3 block"
+            ></i>
+            <p
+              class="text-gray-700 dark:text-gray-300 text-base leading-relaxed mb-6"
+            >
+              "As someone with an equity portfolio already, I was skeptical
+              about adding intraday exposure. StratX's basket model and defined
+              drawdown limits convinced me. Excellent risk management and the
+              platform is rock-solid."
+            </p>
+            <div class="flex items-center gap-3">
+              <div
+                class="w-10 h-10 bg-gradient-to-br from-blue-400 to-blue-600 rounded-full flex items-center justify-center text-white font-bold font-display"
+              >
+                P
+              </div>
+              <div>
+                <div class="font-semibold text-sm font-display">
+                  Priya Patel
+                </div>
+                <div class="text-xs text-gray-400 mono">
+                  Bengaluru · ₹25L Capital · 7 Months
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="text-center mt-12 section-fade">
+          <a
+            href="https://trade.stratxalgo.in"
+            target="_blank"
+            class="inline-flex items-center gap-2.5 px-7 py-4 bg-amber-600 hover:bg-amber-500 text-white font-display font-700 rounded-xl transition-all shadow-lg shadow-amber-900/20 hover:scale-105"
+          >
+            <i class="fa-solid fa-bolt"></i> Join Them - Trade Now
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════════════════ CONTACT ═══════════════════════ -->
+    <section id="contact" class="py-20 bg-white dark:bg-gray-950">
+      <div class="max-w-4xl mx-auto px-4 sm:px-6 text-center">
+        <div class="section-fade">
+          <span
+            class="mono text-xs text-amber-600 dark:text-amber-400 uppercase tracking-widest"
+            >Get In Touch</span
+          >
+          <h2 class="text-3xl sm:text-4xl font-display font-700 mt-2 mb-4">
+            Ready to <span class="text-amber-500">Start?</span>
+          </h2>
+          <p class="text-gray-500 dark:text-gray-400 mb-2">
+            Add
+            <a
+              href="https://trade.stratxalgo.in"
+              class="text-amber-500 hover:underline mono text-sm"
+              target="_blank"
+              >trade.stratxalgo.in</a
+            >
+            to automate and see strategies - start automatic trading today.
+          </p>
+          <p class="text-gray-400 dark:text-gray-500 text-sm mb-10">
+            Our team is available Mon–Fri, 9:00 AM – 5:30 PM IST
+          </p>
+
+          <div
+            class="flex flex-col sm:flex-row gap-4 justify-center items-center"
+          >
+            <!-- WhatsApp -->
+            <a
+              href="https://wa.me/+919876543210?text=I'm%20interested%20in%20StratX%20Algo"
+              target="_blank"
+              rel="noopener"
+              aria-label="Chat on WhatsApp"
+              class="flex items-center gap-3 px-6 py-4 bg-amber-500 hover:bg-amber-400 text-white font-semibold rounded-xl transition-all shadow-lg shadow-amber-900/20 hover:scale-105 w-full sm:w-auto justify-center"
+            >
+              <i class="fa-brands fa-whatsapp text-xl"></i>
+              Chat on WhatsApp
+            </a>
+            <!-- Email -->
+            <a
+              href="/cdn-cgi/l/email-protection#10797e767f50636462716468717c777f3e797e2f6365727a7573642d597e616579626935222071727f6564352220436462716448352220517c777f"
+              aria-label="Email StratX Algo"
+              class="flex items-center gap-3 px-6 py-4 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 font-semibold rounded-xl transition-all hover:scale-105 w-full sm:w-auto justify-center border border-gray-200 dark:border-gray-700"
+            >
+              <i class="fa-regular fa-envelope text-lg"></i>
+              <span
+                class="__cf_email__"
+                data-cfemail="d8b1b6beb798abacaab9aca0b9b4bfb7f6b1b6"
+                >[email&#160;protected]</span
+              >
+            </a>
+            <!-- Book discussion -->
+            <button
+              onclick="openModal()"
+              class="flex items-center gap-3 px-6 py-4 border border-gray-300 dark:border-gray-600 hover:border-blue-500 dark:hover:border-blue-500 text-gray-700 dark:text-gray-200 hover:text-blue-600 dark:hover:text-blue-400 font-semibold rounded-xl transition-all hover:scale-105 w-full sm:w-auto justify-center"
+            >
+              <i class="fa-regular fa-calendar text-lg"></i>
+              Book a Call
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════════════════ FAQs ═══════════════════════ -->
+    <section class="py-20 bg-gray-50 dark:bg-gray-900">
+      <div class="max-w-4xl mx-auto px-4 sm:px-6">
+        <div class="text-center mb-14 section-fade">
+          <h2 class="text-3xl sm:text-4xl font-display font-700">
+            Frequently Asked <span class="text-amber-500">Questions</span>
+          </h2>
+        </div>
+
+        <div class="space-y-4 section-fade">
+          <details
+            class="bg-white dark:bg-gray-800 rounded-lg p-5 border border-gray-200 dark:border-gray-700 group cursor-pointer"
+          >
+            <summary
+              class="flex items-center justify-between font-semibold hover:text-amber-600 dark:hover:text-amber-400 transition-colors"
+            >
+              What is the minimum capital required?
+              <i
+                class="fa-solid fa-chevron-down text-sm group-open:rotate-180 transition-transform"
+              ></i>
+            </summary>
+            <p class="text-gray-600 dark:text-gray-400 text-sm mt-3">
+              The minimum capital required to start is ₹6 Lakhs. We offer
+              tier-based strategies for ₹6L, ₹10L, ₹15L, and ₹25L+ brackets.
+            </p>
+          </details>
+
+          <details
+            class="bg-white dark:bg-gray-800 rounded-lg p-5 border border-gray-200 dark:border-gray-700 group cursor-pointer"
+          >
+            <summary
+              class="flex items-center justify-between font-semibold hover:text-amber-600 dark:hover:text-amber-400 transition-colors"
+            >
+              How is the risk managed?
+              <i
+                class="fa-solid fa-chevron-down text-sm group-open:rotate-180 transition-transform"
+              ></i>
+            </summary>
+            <p class="text-gray-600 dark:text-gray-400 text-sm mt-3">
+              Risk is controlled through pre-defined SL logic, capital
+              allocation discipline across tiers, and daily drawdown limits.
+              Your maximum loss is defined before deployment.
+            </p>
+          </details>
+
+          <details
+            class="bg-white dark:bg-gray-800 rounded-lg p-5 border border-gray-200 dark:border-gray-700 group cursor-pointer"
+          >
+            <summary
+              class="flex items-center justify-between font-semibold hover:text-amber-600 dark:hover:text-amber-400 transition-colors"
+            >
+              What indices do you trade?
+              <i
+                class="fa-solid fa-chevron-down text-sm group-open:rotate-180 transition-transform"
+              ></i>
+            </summary>
+            <p class="text-gray-600 dark:text-gray-400 text-sm mt-3">
+              We operate on NIFTY 50 and Sensex indices with strategies designed
+              for intraday trading across different market conditions.
+            </p>
+          </details>
+
+          <details
+            class="bg-white dark:bg-gray-800 rounded-lg p-5 border border-gray-200 dark:border-gray-700 group cursor-pointer"
+          >
+            <summary
+              class="flex items-center justify-between font-semibold hover:text-amber-600 dark:hover:text-amber-400 transition-colors"
+            >
+              How is the strategy backtested?
+              <i
+                class="fa-solid fa-chevron-down text-sm group-open:rotate-180 transition-transform"
+              ></i>
+            </summary>
+            <p class="text-gray-600 dark:text-gray-400 text-sm mt-3">
+              All strategies are backtested across 5+ years of NSE index data to
+              ensure robustness and adapted for multi-regime market conditions.
+            </p>
+          </details>
+
+          <details
+            class="bg-white dark:bg-gray-800 rounded-lg p-5 border border-gray-200 dark:border-gray-700 group cursor-pointer"
+          >
+            <summary
+              class="flex items-center justify-between font-semibold hover:text-amber-600 dark:hover:text-amber-400 transition-colors"
+            >
+              Can I run this alongside my existing portfolio?
+              <i
+                class="fa-solid fa-chevron-down text-sm group-open:rotate-180 transition-transform"
+              ></i>
+            </summary>
+            <p class="text-gray-600 dark:text-gray-400 text-sm mt-3">
+              Yes, StratX is specifically designed to complement existing equity
+              portfolios as a systematic alpha-generating overlay with capital
+              efficiency.
+            </p>
+          </details>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════════════════ FOOTER ═══════════════════════ -->
+    <footer class="bg-gray-950 text-gray-400 py-10 border-t border-gray-800">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6">
+        <div
+          class="flex flex-col md:flex-row items-center justify-between gap-6"
+        >
+          <div class="flex items-center gap-2">
+            <img
+              src="https://bkstarling.github.io/p1/v1_STRATX_PNG.png"
+              alt="StratX Algo logo"
+              class="h-10 w-auto object-contain"
+              loading="lazy"
+            />
+          </div>
+
+          <p class="text-sm text-center">
+            © 2026 StratX Algo. All rights reserved.
+            <span class="text-gray-600">|</span>
+            <span class="text-xs"
+              >Algo trading involves market risk. Past performance is not
+              indicative of future results.</span
+            >
+          </p>
+
+          <div class="flex items-center gap-4">
+            <a
+              href="https://trade.stratxalgo.in"
+              target="_blank"
+              class="flex items-center gap-1.5 px-4 py-2 bg-amber-600 hover:bg-amber-500 text-white text-sm font-semibold rounded-lg transition-all"
+            >
+              <i class="fa-solid fa-bolt text-xs"></i> Trade Now
+            </a>
+            <a
+              href="https://x.com/StratXalgo"
+              target="_blank"
+              aria-label="Twitter"
+              class="w-8 h-8 border border-gray-700 hover:border-blue-400 hover:text-blue-400 rounded-lg flex items-center justify-center text-sm transition-all"
+            >
+              <i class="fa-brands fa-x-twitter"></i>
+            </a>
+            <a
+              href="#"
+              aria-label="LinkedIn"
+              class="w-8 h-8 border border-gray-700 hover:border-blue-500 hover:text-blue-500 rounded-lg flex items-center justify-center text-sm transition-all"
+            >
+              <i class="fa-brands fa-linkedin-in"></i>
+            </a>
+            <a
+              href="https://www.instagram.com/stratxalgo?igsh=aG9xNTNzeXF5NXJt&utm_source=qr"
+              target="_blank"
+              aria-label="Instagram"
+              class="w-8 h-8 border border-gray-700 hover:border-pink-500 hover:text-pink-500 rounded-lg flex items-center justify-center text-sm transition-all"
+            >
+              <i class="fa-brands fa-instagram"></i>
+            </a>
+            <a
+              href="https://t.me/StratX_Algo"
+              target="_blank"
+              aria-label="Telegram"
+              class="w-8 h-8 border border-gray-700 hover:border-cyan-400 hover:text-cyan-400 rounded-lg flex items-center justify-center text-sm transition-all"
+            >
+              <i class="fa-brands fa-telegram"></i>
+            </a>
+            <a
+              href="https://x.com/StratXalgo"
+              target="_blank"
+              aria-label="Twitter"
+              class="w-8 h-8 border border-gray-700 hover:border-blue-400 hover:text-blue-400 rounded-lg flex items-center justify-center text-sm transition-all"
+            >
+              <i class="fa-brands fa-x-twitter"></i>
+            </a>
+          </div>
+        </div>
+      </div>
+    </footer>
+
+    <!-- ═══════════════════════ FIXED MOBILE CTA ═══════════════════════ -->
+    <div
+      id="fixed-cta"
+      class="fixed bottom-0 left-0 right-0 z-50 p-3 bg-gray-950/95 backdrop-blur-md border-t border-gray-800 flex gap-2"
+    >
+      <a
+        href="https://trade.stratxalgo.in"
+        target="_blank"
+        class="flex-1 flex items-center justify-center gap-2 py-3 bg-amber-600 hover:bg-amber-500 text-white font-display font-700 rounded-xl text-sm transition-all"
+      >
+        <i class="fa-solid fa-bolt text-xs"></i> Trade Now
+      </a>
+      <button
+        onclick="openModal()"
+        class="flex items-center justify-center px-4 py-3 border border-gray-700 text-gray-300 rounded-xl text-sm transition-all hover:border-amber-500"
+      >
+        <i class="fa-regular fa-calendar"></i>
+      </button>
+    </div>
+
+    <!-- ═══════════════════════ MODAL ═══════════════════════ -->
+    <div
+      id="modal-overlay"
+      class="fixed inset-0 z-[100] items-center justify-center bg-black/70 backdrop-blur-sm p-4"
+    >
+      <div
+        class="bg-white dark:bg-gray-900 rounded-2xl w-full max-w-lg shadow-2xl border border-gray-200 dark:border-gray-700 overflow-y-auto max-h-[90vh]"
+      >
+        <div
+          class="flex items-center justify-between p-6 border-b border-gray-100 dark:border-gray-800"
+        >
+          <div>
+            <h3 class="font-display font-700 text-xl">
+              Book Strategy Discussion
+            </h3>
+            <p class="text-xs text-gray-400 mt-0.5">
+              Tell us about your trading goals
+            </p>
+          </div>
+          <button
+            onclick="closeModal()"
+            aria-label="Close modal"
+            class="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-all"
+          >
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+
+        <form class="p-6 space-y-5" onsubmit="submitForm(event)">
+          <div>
+            <label class="block text-sm font-medium mb-1.5" for="f-name"
+              >Full Name</label
+            >
+            <input
+              type="text"
+              id="f-name"
+              required
+              placeholder="Rohan Sharma"
+              class="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent placeholder-gray-400 transition-all"
+            />
+          </div>
+          <div>
+            <label class="block text-sm font-medium mb-1.5" for="f-email"
+              >Email Address</label
+            >
+            <input
+              type="email"
+              id="f-email"
+              required
+              placeholder="rohan@example.com"
+              class="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent placeholder-gray-400 transition-all"
+            />
+          </div>
+          <div>
+            <label class="block text-sm font-medium mb-2">Primary Goal</label>
+            <div class="space-y-2">
+              <label class="flex items-center gap-2 text-sm cursor-pointer">
+                <input
+                  type="radio"
+                  name="primaryGoal"
+                  value="capital-preservation"
+                  class="accent-amber-500 w-4 h-4"
+                />
+                Capital Preservation
+              </label>
+              <label class="flex items-center gap-2 text-sm cursor-pointer">
+                <input
+                  type="radio"
+                  name="primaryGoal"
+                  value="systematic-returns"
+                  class="accent-amber-500 w-4 h-4"
+                />
+                Systematic Returns
+              </label>
+              <label class="flex items-center gap-2 text-sm cursor-pointer">
+                <input
+                  type="radio"
+                  name="primaryGoal"
+                  value="portfolio-augmentation"
+                  class="accent-amber-500 w-4 h-4"
+                />
+                Portfolio Augmentation
+              </label>
+              <label class="flex items-center gap-2 text-sm cursor-pointer">
+                <input
+                  type="radio"
+                  name="primaryGoal"
+                  value="other"
+                  class="accent-amber-500 w-4 h-4"
+                />
+                Other
+              </label>
+            </div>
+          </div>
+          <div>
+            <label class="block text-sm font-medium mb-1.5" for="f-phone"
+              >Phone Number</label
+            >
+            <div class="flex gap-2">
+              <span
+                class="px-3 py-3 bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-sm text-gray-500 mono whitespace-nowrap"
+                >+91</span
+              >
+              <input
+                type="tel"
+                id="f-phone"
+                required
+                placeholder="98765 43210"
+                pattern="[0-9]{10}"
+                class="flex-1 px-4 py-3 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent placeholder-gray-400 transition-all"
+              />
+            </div>
+          </div>
+          <div>
+            <label class="block text-sm font-medium mb-1.5" for="f-capital"
+              >Capital Range (INR)</label
+            >
+            <select
+              id="f-capital"
+              required
+              class="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all"
+            >
+              <option value="" disabled selected>Select capital range</option>
+              <option value="6L">₹6 Lakhs</option>
+              <option value="10L">₹10 Lakhs</option>
+              <option value="15L">₹15 Lakhs</option>
+              <option value="25L+">₹25 Lakhs and above</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-sm font-medium mb-2"
+              >Do you have an existing equity portfolio?</label
+            >
+            <div class="flex gap-6">
+              <label class="flex items-center gap-2 text-sm cursor-pointer">
+                <input
+                  type="radio"
+                  name="portfolio"
+                  value="yes"
+                  class="accent-amber-500 w-4 h-4"
+                />
+                Yes
+              </label>
+              <label class="flex items-center gap-2 text-sm cursor-pointer">
+                <input
+                  type="radio"
+                  name="portfolio"
+                  value="no"
+                  class="accent-amber-500 w-4 h-4"
+                />
+                No
+              </label>
+            </div>
+          </div>
+          <div>
+            <label class="block text-sm font-medium mb-1.5" for="f-experience"
+              >Trading Experience</label
+            >
+            <select
+              id="f-experience"
+              required
+              class="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all"
+            >
+              <option value="" disabled selected>
+                Select experience level
+              </option>
+              <option value="beginner">Beginner (&lt;1 year)</option>
+              <option value="intermediate">Intermediate (1–3 years)</option>
+              <option value="advanced">Advanced (3+ years)</option>
+            </select>
+          </div>
+
+          <button
+            type="submit"
+            class="w-full flex items-center justify-center gap-2 py-3.5 bg-amber-600 hover:bg-amber-500 text-white font-display font-700 rounded-xl transition-all shadow-lg shadow-amber-900/20 text-base"
+          >
+            <i class="fa-solid fa-calendar-check"></i>
+            Book My Discussion Slot
+          </button>
+          <p class="text-xs text-gray-400 text-center">
+            We'll reach out within 24 hours to confirm your slot.
+          </p>
+        </form>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════ SCRIPTS ═══════════════════════ -->
+    <script>
+      // ═════════════════════════════════════════════════════════════
+      // SITE DATA OBJECT - Easy to modify all content from one place
+      // ═════════════════════════════════════════════════════════════
+      const siteData = {
+        brand: {
+          name: 'StratX Algo',
+          tagline: 'Systematic Index Trading Strategies India',
+          logoUrl: 'https://bkstarling.github.io/p1/v1_STRATX_PNG.png',
+          tradeUrl: 'https://trade.stratxalgo.in',
+        },
+        contact: {
+          email: 'stratxalgo@gmail.com',
+          phone: '+91-7676766477',
+          telegram: 'https://t.me/StratX_Algo',
+          instagram:
+            'https://www.instagram.com/stratxalgo?igsh=aG9xNTNzeXF5NXJt&utm_source=qr',
+          twitter: 'https://x.com/StratXalgo',
+          instagramHandle: 'stratxalgo',
+          twitterHandle: 'StratXalgo',
+        },
+        marquee: [
+          {
+            icon: 'fa-solid fa-check-circle',
+            color: 'amber',
+            text: 'NIFTY 50 Index · Intraday · Basket Deployed',
+          },
+          {
+            icon: 'fa-solid fa-check-circle',
+            color: 'blue',
+            text: 'Sensex Index · Risk-Defined · Auto-Execution',
+          },
+          {
+            icon: 'fa-solid fa-exclamation-triangle',
+            color: 'yellow',
+            text: 'Backtested across 5+ Years of NSE Index Data',
+          },
+          {
+            icon: 'fa-solid fa-check-circle',
+            color: 'amber',
+            text: 'Risk Controlled Execution with Pre-defined SL Logic',
+          },
+          {
+            icon: 'fa-solid fa-check-circle',
+            color: 'blue',
+            text: 'Capital Allocation Discipline · Available for ₹6L+',
+          },
+          {
+            icon: 'fa-solid fa-check-circle',
+            color: 'gray',
+            text: 'trade.stratxalgo.in · Systematic Index Algo Trading',
+          },
+        ],
+        heroStats: [
+          { value: '100+', label: 'Active Traders', color: 'amber' },
+          { value: '99.9%', label: 'Uptime', color: 'blue' },
+          { value: '₹6L+', label: 'Min Capital', color: 'amber' },
+          { value: '5+ Yrs', label: 'Backtested Data', color: 'blue' },
+        ],
+        heroButtons: [
+          {
+            text: 'Explore Baskets & Tiers',
+            icon: 'fa-solid fa-bolt',
+            type: 'primary',
+            url: 'https://trade.stratxalgo.in',
+            target: '_blank',
+          },
+          {
+            text: 'Book Strategy Discussion',
+            icon: 'fa-regular fa-calendar',
+            type: 'secondary',
+            action: 'openModal()',
+          },
+        ],
+        whyTradersFail: {
+          title: 'Why Most Traders Fail',
+          subtitle: 'and How We Fix It',
+          description:
+            'Retail traders lose not because markets are unfair, but because decisions are driven by fear, greed, and inconsistency.',
+          problems: [
+            {
+              icon: 'fa-solid fa-brain',
+              color: 'red',
+              title: 'Emotional Decisions',
+              description:
+                'FOMO entries, panic exits, and revenge trading destroy capital systematically over time.',
+            },
+            {
+              icon: 'fa-solid fa-shuffle',
+              color: 'amber',
+              title: 'Inconsistent Execution',
+              description:
+                'Manual trading is riddled with delays, hesitation, and skipped signals from strategy drift.',
+            },
+            {
+              icon: 'fa-solid fa-rupee-sign',
+              color: 'blue',
+              title: 'Poor Capital Allocation',
+              description:
+                'Over-concentration in single trades and no position-sizing discipline leads to oversized losses.',
+            },
+            {
+              icon: 'fa-solid fa-triangle-exclamation',
+              color: 'yellow',
+              title: 'Undefined Risk Exposure',
+              description:
+                'No pre-defined drawdown limits, no stop logic - just hope masquerading as a trading strategy.',
+            },
+          ],
+        },
+        features: [
+          {
+            icon: 'fa-solid fa-chart-line',
+            color: 'amber',
+            title: 'Backtested Across 5+ Years',
+            description:
+              'All NIFTY 50 and Sensex strategies validated against 5+ years of historical NSE index data. Proven edge across multiple market regimes.',
+            badge: 'Historical validation',
+          },
+          {
+            icon: 'fa-solid fa-shield-halved',
+            color: 'blue',
+            title: 'Risk Controlled Execution',
+            description:
+              'Pre-defined stop-loss logic on every position. Daily loss limits enforce capital preservation. Your downside is always controlled.',
+            badge: 'Defined SL logic',
+          },
+          {
+            icon: 'fa-solid fa-gauge',
+            color: 'amber',
+            title: 'Multi Regime Design',
+            description:
+              'Strategies adapt across trending, range-bound, and high-volatility markets. Not locked to a single regime - systematic across conditions.',
+            badge: 'Regime-adaptive',
+          },
+          {
+            icon: 'fa-solid fa-layer-group',
+            color: 'blue',
+            title: 'Tiered Capital Access',
+            description:
+              'Start with ₹6L and scale to 10L, 15L, or 25L+. Each tier optimizes position sizing and capital allocation discipline across your portfolio.',
+            badge: 'Tiered scaling',
+          },
+        ],
+        faq: [
+          {
+            question: 'What is the minimum capital required?',
+            answer:
+              'The minimum capital required to start is ₹6 Lakhs. We offer tier-based strategies for ₹6L, ₹10L, ₹15L, and ₹25L+ brackets.',
+          },
+          {
+            question: 'How is the risk managed?',
+            answer:
+              'Risk is controlled through pre-defined SL logic, capital allocation discipline across tiers, and daily drawdown limits. Your maximum loss is defined before deployment.',
+          },
+          {
+            question: 'What indices do you trade?',
+            answer:
+              'We operate on NIFTY 50 and Sensex indices with strategies designed for intraday trading across different market conditions.',
+          },
+          {
+            question: 'How is the strategy backtested?',
+            answer:
+              'All strategies are backtested across 5+ years of NSE index data to ensure robustness and adapted for multi-regime market conditions.',
+          },
+          {
+            question: 'Can I run this alongside my existing portfolio?',
+            answer:
+              'Yes, StratX is specifically designed to complement existing equity portfolios as a systematic alpha-generating overlay with capital efficiency.',
+          },
+        ],
+        modalForm: {
+          title: 'Book Strategy Discussion',
+          subtitle: 'Tell us about your trading goals',
+          submitButton: 'Book My Discussion Slot',
+          successMessage: "Submitted! We'll contact you soon.",
+        },
+      };
+
+      // Consume data - Example: Access any data point
+      // Example: console.log(siteData.heroStats[0].value); // Outputs: 100+
+
+      // Theme toggle
+      function toggleTheme() {
+        const html = document.documentElement;
+        html.classList.toggle('dark');
+        localStorage.setItem(
+          'theme',
+          html.classList.contains('dark') ? 'dark' : 'light',
         );
       }
+      // Load persisted theme
+      (function () {
+        const saved = localStorage.getItem('theme');
+        if (
+          saved === 'dark' ||
+          (!saved && window.matchMedia('(prefers-color-scheme: dark)').matches)
+        ) {
+          document.documentElement.classList.add('dark');
+        }
+      })();
 
-      ReactDOM.render(<App />, document.getElementById('root'));
+      // Mobile menu
+      function toggleMenu() {
+        const menu = document.getElementById('mobile-menu');
+        const icon = document.getElementById('ham-icon');
+        menu.classList.toggle('open');
+        icon.className = menu.classList.contains('open')
+          ? 'fa-solid fa-xmark text-lg'
+          : 'fa-solid fa-bars text-lg';
+      }
+      function closeMenu() {
+        const menu = document.getElementById('mobile-menu');
+        const icon = document.getElementById('ham-icon');
+        menu.classList.remove('open');
+        icon.className = 'fa-solid fa-bars text-lg';
+      }
+
+      // Modal
+      function openModal() {
+        const overlay = document.getElementById('modal-overlay');
+        overlay.classList.add('open');
+        document.body.style.overflow = 'hidden';
+      }
+      function closeModal() {
+        const overlay = document.getElementById('modal-overlay');
+        overlay.classList.remove('open');
+        document.body.style.overflow = '';
+      }
+      // Close modal on overlay click
+      document
+        .getElementById('modal-overlay')
+        .addEventListener('click', function (e) {
+          if (e.target === this) closeModal();
+        });
+
+      // Form submit
+      function submitForm(e) {
+        e.preventDefault();
+        const btn = e.target.querySelector('button[type=submit]');
+        btn.innerHTML =
+          '<i class="fa-solid fa-circle-check"></i> Submitted! We\'ll contact you soon.';
+        btn.classList.remove('bg-amber-600', 'hover:bg-amber-500');
+        btn.classList.add('bg-amber-700');
+        btn.disabled = true;
+        setTimeout(() => closeModal(), 2500);
+      }
+
+      // Scroll reveal
+      const observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              entry.target.classList.add('visible');
+              observer.unobserve(entry.target);
+            }
+          });
+        },
+        { threshold: 0.1 },
+      );
+      document
+        .querySelectorAll('.section-fade')
+        .forEach((el) => observer.observe(el));
+
+      // Smooth scroll for anchor links
+      document.querySelectorAll('a[href^="#"]').forEach((a) => {
+        a.addEventListener('click', function (e) {
+          e.preventDefault();
+          const target = document.querySelector(this.getAttribute('href'));
+          if (target) target.scrollIntoView({ behavior: 'smooth' });
+        });
+      });
     </script>
   </body>
 </html>
