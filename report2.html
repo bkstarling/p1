@@ -103,19 +103,14 @@
       .p-head p { font-size: 12px; color: var(--muted); margin-top: 2px; }
       .p-wrap { flex: 1; display: flex; align-items: center; justify-content: center; }
 
-      /* REPORT CARD */
-      .rc { width: 700px; min-height: 700px; padding: 30px 38px 32px; display: flex; flex-direction: column; box-shadow: 0 40px 120px rgba(0,0,0,.85); }
-      .rc-hdr { text-align: center; margin-bottom: 14px; }
-      .rc-logo-wrap { display: flex; justify-content: center; margin-bottom: 12px; }
-      .rc-logo { max-width: 270px; max-height: 100px; object-fit: contain; }
-
-      /* Period label pill */
-      .rc-period-pill { display: inline-block; padding: 4px 14px; border-radius: 20px; font-size: 11px; font-weight: 700;
-        font-family: 'Outfit', sans-serif; letter-spacing: 1.2px; text-transform: uppercase;
-        background: rgba(59,130,246,0.18); border: 1px solid rgba(59,130,246,0.35); color: #93c5fd; margin-bottom: 8px; }
+      /* REPORT CARD — strict 700×700 square */
+      .rc { width: 700px; height: 700px; padding: 28px 36px 28px; display: flex; flex-direction: column; box-shadow: 0 40px 120px rgba(0,0,0,.85); overflow: hidden; flex-shrink: 0; }
+      .rc-hdr { text-align: center; margin-bottom: 10px; flex-shrink: 0; }
+      .rc-logo-wrap { display: flex; justify-content: center; margin-bottom: 8px; }
+      .rc-logo { max-width: 240px; max-height: 80px; object-fit: contain; }
 
       /* Basket table */
-      .bkt-table { flex: 1; display: flex; flex-direction: column; gap: 10px; padding: 10px 0 12px; }
+      .bkt-table { flex: 1; display: flex; flex-direction: column; gap: 8px; padding: 8px 0 8px; min-height: 0; }
 
       /* Each basket card */
       .bkt-card { border-radius: 16px; padding: 18px 22px; display: flex; align-items: center; justify-content: space-between;
@@ -136,8 +131,8 @@
       .day-label-sm { font-size: 7px; font-weight: 700; opacity: .5; letter-spacing: .5px; }
       .day-val-sm { font-family: 'JetBrains Mono', monospace; font-size: 8px; font-weight: 500; }
 
-      .rc-disc { text-align: center; line-height: 1.6; padding: 10px 14px; border-radius: 10px;
-        background: rgba(0,0,0,.22); color: rgba(255,255,255,.4); }
+      .rc-disc { text-align: center; line-height: 1.6; padding: 8px 14px; border-radius: 10px;
+        background: rgba(0,0,0,.22); color: rgba(255,255,255,.4); flex-shrink: 0; }
       .rc-disc strong { color: rgba(255,255,255,.6); letter-spacing: .4px; }
     </style>
   </head>
@@ -235,6 +230,7 @@
           alpha:'4.20', alphaP:'4.80', alphaX:'3.60'
         });
 
+        const [customTitle, setCustomTitle] = useState('');
         const [disclaimer, setDisclaimer] = useState('Past performance is not indicative of future returns. Basket returns are indicative. Not financial advice. Trading involves risk.');
         const [logo, setLogo] = useState(DEFAULT_LOGO);
         const [theme, setTheme] = useState('midnight');
@@ -280,11 +276,13 @@
           return weekly[id].reduce((s,v)=>s+(parseFloat(v)||0),0).toFixed(2);
         };
 
-        const periodLabel = mode==='daily'
+        const autoTitle = mode==='daily'
           ? DAY_FULL[selDay]
           : mode==='monthly'
           ? 'Monthly Performance'
           : 'Weekly Performance';
+
+        const periodLabel = customTitle.trim() || autoTitle;
 
         const subLabel = mode==='daily'
           ? fmtDate(date)
@@ -329,6 +327,10 @@
                   <div className="fg">
                     <label>{mode==='daily'?'Date':mode==='weekly'?'Week Starting Date':'Month (pick any date in month)'}</label>
                     <input type="date" value={date} onChange={e=>setDate(e.target.value)} />
+                  </div>
+                  <div className="fg">
+                    <label>Custom Title <span style={{color:'var(--muted)',fontWeight:400}}>(optional — overrides auto title)</span></label>
+                    <input type="text" value={customTitle} onChange={e=>setCustomTitle(e.target.value)} placeholder={autoTitle} />
                   </div>
                 </div>
 
@@ -436,9 +438,6 @@
                         <img src={logo} alt="Logo" className="rc-logo" crossOrigin="anonymous" />
                       </div>
                     )}
-                    <div style={{marginBottom:'6px'}}>
-                      <span className="rc-period-pill">{mode==='daily'?'Daily':'mode'==='weekly'?'Weekly':'Monthly'} {mode==='daily'?'Report':mode==='weekly'?'Report':'Report'}</span>
-                    </div>
                     <div style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:`${fs.title}px`,letterSpacing:'5px',textTransform:'uppercase',lineHeight:1,color:T.textColor}}>
                       {periodLabel}
                     </div>
