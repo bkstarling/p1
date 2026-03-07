@@ -1,0 +1,513 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>STRATX Basket Performance Generator</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+      *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+      :root {
+        --bg: #070c18; --surface: #0c1526; --surface2: #101d33;
+        --border: rgba(255,255,255,0.06); --border2: rgba(255,255,255,0.1);
+        --text: #dce8f8; --muted: #384e6e; --dim: #7090b8;
+        --blue: #3b82f6; --blue-glow: rgba(59,130,246,0.18);
+      }
+      body { font-family: 'Outfit', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+      .app { display: grid; grid-template-columns: 480px 1fr; height: 100vh; }
+
+      /* SIDEBAR */
+      .sidebar { background: var(--surface); border-right: 1px solid var(--border); overflow-y: auto; display: flex; flex-direction: column; }
+      .sidebar::-webkit-scrollbar { width: 4px; }
+      .sidebar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 2px; }
+      .s-head { padding: 24px 24px 18px; border-bottom: 1px solid var(--border); background: linear-gradient(180deg, rgba(59,130,246,0.08) 0%, transparent 100%); }
+      .s-head h1 { font-size: 17px; font-weight: 700; color: var(--text); }
+      .s-head p { font-size: 12px; color: var(--muted); margin-top: 3px; }
+      .s-body { padding: 16px 20px; flex: 1; display: flex; flex-direction: column; gap: 10px; }
+
+      .fc { background: var(--surface2); border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; }
+      .fc-title { font-size: 10px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 1.4px; margin-bottom: 12px; }
+      .fg { margin-bottom: 9px; }
+      .fg:last-child { margin-bottom: 0; }
+      .fg label { display: block; font-size: 11px; font-weight: 600; color: var(--dim); margin-bottom: 5px; }
+      .fg input, .fg select, .fg textarea {
+        width: 100%; padding: 8px 11px; background: var(--bg); border: 1px solid var(--border2);
+        border-radius: 8px; font-size: 13px; font-family: 'Outfit', sans-serif; color: var(--text);
+        transition: border-color .15s, box-shadow .15s;
+      }
+      .fg input[type='number'], .fg input[type='date'] { font-family: 'JetBrains Mono', monospace; font-size: 12px; }
+      .fg input[type='range'] { padding: 4px 0; background: none; border: none; accent-color: var(--blue); cursor: pointer; }
+      .fg input[type='range']:focus { box-shadow: none; }
+      .fg input:focus, .fg select:focus, .fg textarea:focus { outline: none; border-color: var(--blue); box-shadow: 0 0 0 3px var(--blue-glow); }
+      .fg select option { background: #0c1526; }
+      .fg small { display: block; margin-top: 4px; font-size: 10px; color: var(--muted); }
+      .two { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; }
+      .three { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 9px; }
+
+      /* Day pills */
+      .day-grid { display: grid; grid-template-columns: repeat(5,1fr); gap: 6px; margin-bottom: 12px; }
+      .day-pill { border: 1.5px solid var(--border2); border-radius: 8px; background: none; cursor: pointer;
+        padding: 7px 4px; font-size: 10px; font-weight: 700; color: var(--dim); text-align: center;
+        font-family: 'Outfit', sans-serif; transition: all .15s; letter-spacing: .5px; }
+      .day-pill:hover { border-color: rgba(59,130,246,0.5); color: var(--text); }
+      .day-pill.on { border-color: var(--blue); background: rgba(59,130,246,0.15); color: #93c5fd; box-shadow: 0 0 0 2px var(--blue-glow); }
+
+      /* Period toggle */
+      .period-row { display: flex; gap: 6px; margin-bottom: 10px; }
+      .period-btn { flex: 1; padding: 8px; border: 1.5px solid var(--border2); border-radius: 8px; background: none;
+        cursor: pointer; font-size: 11px; font-weight: 700; color: var(--dim); font-family: 'Outfit', sans-serif; transition: all .15s; }
+      .period-btn.on { border-color: var(--blue); background: rgba(59,130,246,0.15); color: #93c5fd; }
+
+      /* Basket row */
+      .basket-row { display: flex; align-items: center; gap: 8px; padding: 10px 12px;
+        background: var(--bg); border: 1px solid var(--border); border-radius: 10px; margin-bottom: 7px; }
+      .basket-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+      .basket-name { font-size: 12px; font-weight: 700; color: var(--text); width: 70px; flex-shrink: 0; }
+      .basket-inp { flex: 1; padding: 6px 10px; background: var(--surface2); border: 1px solid var(--border2);
+        border-radius: 7px; font-size: 12px; font-family: 'JetBrains Mono', monospace; color: var(--text); }
+      .basket-inp:focus { outline: none; border-color: var(--blue); }
+      .basket-suffix { font-size: 11px; color: var(--muted); }
+
+      /* Font sliders */
+      .fs-row { display: flex; align-items: center; gap: 10px; }
+      .fs-row input[type='range'] { flex: 1; }
+      .fs-badge { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--blue); min-width: 30px; text-align: right; }
+
+      /* Theme */
+      .theme-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; }
+      .t-btn { border: 2px solid var(--border); border-radius: 10px; background: none; cursor: pointer; overflow: hidden; padding: 0; transition: border-color .15s, box-shadow .15s; }
+      .t-btn:hover { border-color: var(--border2); }
+      .t-btn.on { border-color: var(--blue); box-shadow: 0 0 0 3px var(--blue-glow); }
+      .t-swatch { height: 34px; width: 100%; }
+      .t-name { padding: 5px 4px; font-size: 9px; font-weight: 600; color: var(--muted); text-align: center; background: var(--bg); }
+      .t-btn.on .t-name { color: #60a5fa; }
+
+      .dl-btn { width: 100%; padding: 13px; background: linear-gradient(135deg,#3b82f6,#2563eb); color: #fff;
+        border: none; border-radius: 10px; font-size: 14px; font-weight: 700; font-family: 'Outfit', sans-serif;
+        cursor: pointer; letter-spacing: .3px; transition: all .2s; margin-top: 4px; }
+      .dl-btn:hover:not(:disabled) { background: linear-gradient(135deg,#2563eb,#1d4ed8); box-shadow: 0 8px 24px rgba(59,130,246,.35); transform: translateY(-1px); }
+      .dl-btn:disabled { opacity: .45; cursor: not-allowed; }
+
+      /* PREVIEW */
+      .preview { background: #04080f; overflow-y: auto; display: flex; flex-direction: column; padding: 36px 40px; }
+      .preview::-webkit-scrollbar { width: 4px; }
+      .preview::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 2px; }
+      .p-head { margin-bottom: 24px; }
+      .p-head h2 { font-size: 16px; font-weight: 700; }
+      .p-head p { font-size: 12px; color: var(--muted); margin-top: 2px; }
+      .p-wrap { flex: 1; display: flex; align-items: center; justify-content: center; }
+
+      /* REPORT CARD */
+      .rc { width: 700px; min-height: 700px; padding: 30px 38px 32px; display: flex; flex-direction: column; box-shadow: 0 40px 120px rgba(0,0,0,.85); }
+      .rc-hdr { text-align: center; margin-bottom: 14px; }
+      .rc-logo-wrap { display: flex; justify-content: center; margin-bottom: 12px; }
+      .rc-logo { max-width: 270px; max-height: 100px; object-fit: contain; }
+
+      /* Period label pill */
+      .rc-period-pill { display: inline-block; padding: 4px 14px; border-radius: 20px; font-size: 11px; font-weight: 700;
+        font-family: 'Outfit', sans-serif; letter-spacing: 1.2px; text-transform: uppercase;
+        background: rgba(59,130,246,0.18); border: 1px solid rgba(59,130,246,0.35); color: #93c5fd; margin-bottom: 8px; }
+
+      /* Basket table */
+      .bkt-table { flex: 1; display: flex; flex-direction: column; gap: 10px; padding: 10px 0 12px; }
+
+      /* Each basket card */
+      .bkt-card { border-radius: 16px; padding: 18px 22px; display: flex; align-items: center; justify-content: space-between;
+        backdrop-filter: blur(16px) saturate(160%); -webkit-backdrop-filter: blur(16px) saturate(160%);
+        border: 1px solid rgba(255,255,255,0.1); }
+      .bkt-left { display: flex; flex-direction: column; gap: 4px; }
+      .bkt-tag { font-size: 10px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; opacity: .55; }
+      .bkt-label { font-family: 'Bebas Neue', sans-serif; letter-spacing: 3px; line-height: 1; }
+      .bkt-right { display: flex; align-items: center; gap: 10px; }
+      .bkt-arrow { font-size: 14px; opacity: .9; }
+      .bkt-val { font-family: 'JetBrains Mono', monospace; font-weight: 600; line-height: 1; }
+
+      /* Day row inside basket card (weekly view) */
+      .day-bars { display: flex; gap: 6px; align-items: flex-end; margin-top: 6px; }
+      .day-col { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+      .day-bar-wrap { height: 40px; display: flex; align-items: flex-end; }
+      .day-bar { width: 14px; border-radius: 3px 3px 0 0; min-height: 3px; }
+      .day-label-sm { font-size: 7px; font-weight: 700; opacity: .5; letter-spacing: .5px; }
+      .day-val-sm { font-family: 'JetBrains Mono', monospace; font-size: 8px; font-weight: 500; }
+
+      .rc-disc { text-align: center; line-height: 1.6; padding: 10px 14px; border-radius: 10px;
+        background: rgba(0,0,0,.22); color: rgba(255,255,255,.4); }
+      .rc-disc strong { color: rgba(255,255,255,.6); letter-spacing: .4px; }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="text/babel">
+      const { useState, useRef } = React;
+
+      const THEMES = {
+        midnight: {
+          name: 'Midnight Blue',
+          bg: 'linear-gradient(145deg,#06101f 0%,#0d1f48 40%,#091630 70%,#050e20 100%)',
+          dateBorder: 'rgba(147,197,253,0.25)', textColor: '#ddeeff',
+          tints: ['rgba(59,130,246,0.28)','rgba(16,185,129,0.26)','rgba(168,85,247,0.26)'],
+        },
+        carbon: {
+          name: 'Carbon Slate',
+          bg: 'linear-gradient(145deg,#090a10 0%,#111525 40%,#0f1322 70%,#070810 100%)',
+          dateBorder: 'rgba(203,213,225,0.2)', textColor: '#e2e8f5',
+          tints: ['rgba(99,102,241,0.28)','rgba(14,165,233,0.26)','rgba(234,179,8,0.24)'],
+        },
+        obsidian: {
+          name: 'Obsidian Green',
+          bg: 'linear-gradient(145deg,#030c07 0%,#082012 40%,#061a0e 70%,#030b06 100%)',
+          dateBorder: 'rgba(52,211,153,0.25)', textColor: '#cff0e2',
+          tints: ['rgba(16,185,129,0.28)','rgba(6,182,212,0.26)','rgba(245,158,11,0.24)'],
+        },
+        crimson: {
+          name: 'Crimson Night',
+          bg: 'linear-gradient(145deg,#100608 0%,#2a0a10 40%,#1a060c 70%,#0e0407 100%)',
+          dateBorder: 'rgba(252,165,165,0.2)', textColor: '#fde8e8',
+          tints: ['rgba(239,68,68,0.28)','rgba(249,115,22,0.26)','rgba(168,85,247,0.26)'],
+        },
+        aurora: {
+          name: 'Aurora Teal',
+          bg: 'linear-gradient(145deg,#030f10 0%,#062828 40%,#041e1e 70%,#020c0d 100%)',
+          dateBorder: 'rgba(94,234,212,0.22)', textColor: '#ccfaf4',
+          tints: ['rgba(20,184,166,0.28)','rgba(59,130,246,0.26)','rgba(234,179,8,0.24)'],
+        },
+        royal: {
+          name: 'Royal Purple',
+          bg: 'linear-gradient(145deg,#080510 0%,#160a2e 40%,#100720 70%,#060310 100%)',
+          dateBorder: 'rgba(196,181,253,0.22)', textColor: '#ede9fe',
+          tints: ['rgba(139,92,246,0.28)','rgba(99,102,241,0.26)','rgba(16,185,129,0.26)'],
+        },
+      };
+
+      const BASKETS = [
+        { id: 'alpha',  name: 'Alpha',   dotColor: '#3b82f6', tag: 'BASKET 01' },
+        { id: 'alphaP', name: 'Alpha+',  dotColor: '#10b981', tag: 'BASKET 02' },
+        { id: 'alphaX', name: 'AlphaX',  dotColor: '#a855f7', tag: 'BASKET 03' },
+      ];
+
+      const DAYS = ['MON','TUE','WED','THU','FRI'];
+      const DAY_FULL = ['Monday','Tuesday','Wednesday','Thursday','Friday'];
+      const DEFAULT_LOGO = 'https://bkstarling.github.io/p1/v1_STRATX_PNG.png';
+
+      const fmtDate = (s) => new Date(s).toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'});
+      const plColor = (v) => { const n=parseFloat(v); return n>0?'#4ade80':n<0?'#f87171':'#94a3b8'; };
+      const arr = (v) => { const n=parseFloat(v); return n>0?'▲':n<0?'▼':'●'; };
+      const sgn = (v) => parseFloat(v)>0?'+':'';
+      const maxAbs = (arr) => Math.max(...arr.map(v=>Math.abs(parseFloat(v)||0)),0.01);
+
+      function Slider({ label, value, min, max, step=1, onChange }) {
+        return (
+          <div className="fg">
+            <label>{label}</label>
+            <div className="fs-row">
+              <input type="range" min={min} max={max} step={step} value={value} onChange={e=>onChange(Number(e.target.value))} />
+              <span className="fs-badge">{value}px</span>
+            </div>
+          </div>
+        );
+      }
+
+      function App() {
+        const [mode, setMode] = useState('daily'); // 'daily' | 'weekly' | 'monthly'
+        const [selDay, setSelDay] = useState(0); // 0=Mon…4=Fri
+        const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
+
+        // daily ROI per basket
+        const [daily, setDaily] = useState({
+          alpha:'1.00', alphaP:'1.15', alphaX:'0.90'
+        });
+
+        // weekly: array of 5 days per basket
+        const [weekly, setWeekly] = useState({
+          alpha:  ['0.80','0.50','1.20','-0.30','1.00'],
+          alphaP: ['0.90','0.60','1.30','-0.20','1.15'],
+          alphaX: ['0.70','0.40','1.00','-0.40','0.90'],
+        });
+
+        // monthly ROI per basket
+        const [monthly, setMonthly] = useState({
+          alpha:'4.20', alphaP:'4.80', alphaX:'3.60'
+        });
+
+        const [disclaimer, setDisclaimer] = useState('Past performance is not indicative of future returns. Basket returns are indicative. Not financial advice. Trading involves risk.');
+        const [logo, setLogo] = useState(DEFAULT_LOGO);
+        const [theme, setTheme] = useState('midnight');
+        const [busy, setBusy] = useState(false);
+        const [fs, setFs] = useState({ title:26, date:16, label:26, value:38, tag:10, disc:10 });
+        const setF = (k,v) => setFs(p=>({...p,[k]:v}));
+
+        const ref = useRef(null);
+
+        const handleLogo = (e) => {
+          const f = e.target.files[0]; if(!f) return;
+          const r = new FileReader();
+          r.onloadend = () => setLogo(r.result);
+          r.readAsDataURL(f);
+        };
+
+        const setDailyVal = (id,v) => setDaily(p=>({...p,[id]:v}));
+        const setMonthlyVal = (id,v) => setMonthly(p=>({...p,[id]:v}));
+        const setWeeklyVal = (id,di,v) => setWeekly(p=>{
+          const arr=[...p[id]]; arr[di]=v; return {...p,[id]:arr};
+        });
+
+        const download = async () => {
+          if(!ref.current) return;
+          setBusy(true);
+          try {
+            const c = await html2canvas(ref.current,{scale:4,backgroundColor:null,logging:false,useCORS:true,allowTaint:true});
+            const a = document.createElement('a');
+            a.download = `STRATX_Basket_${mode}_${date}.png`;
+            a.href = c.toDataURL('image/png');
+            a.click();
+          } catch(e) { alert('Export failed. Please try again.'); }
+          finally { setBusy(false); }
+        };
+
+        const T = THEMES[theme];
+
+        // compute what to display per basket
+        const getROI = (id) => {
+          if(mode==='daily') return daily[id];
+          if(mode==='monthly') return monthly[id];
+          // weekly: sum
+          return weekly[id].reduce((s,v)=>s+(parseFloat(v)||0),0).toFixed(2);
+        };
+
+        const periodLabel = mode==='daily'
+          ? DAY_FULL[selDay]
+          : mode==='monthly'
+          ? 'Monthly Performance'
+          : 'Weekly Performance';
+
+        const subLabel = mode==='daily'
+          ? fmtDate(date)
+          : mode==='weekly'
+          ? `Week of ${fmtDate(date)}`
+          : new Date(date).toLocaleDateString('en-IN',{month:'long',year:'numeric'});
+
+        return (
+          <div className="app">
+            {/* SIDEBAR */}
+            <div className="sidebar">
+              <div className="s-head">
+                <h1>📊 STRATX Basket Performance</h1>
+                <p>Generate basket performance report cards</p>
+              </div>
+              <div className="s-body">
+
+                {/* Mode */}
+                <div className="fc">
+                  <div className="fc-title">Report Period</div>
+                  <div className="period-row">
+                    {['daily','weekly','monthly'].map(m=>(
+                      <button key={m} className={`period-btn ${mode===m?'on':''}`} onClick={()=>setMode(m)}>
+                        {m.charAt(0).toUpperCase()+m.slice(1)}
+                      </button>
+                    ))}
+                  </div>
+
+                  {mode==='daily' && (
+                    <>
+                      <div className="fc-title" style={{marginTop:'4px'}}>Select Day</div>
+                      <div className="day-grid">
+                        {DAYS.map((d,i)=>(
+                          <button key={d} className={`day-pill ${selDay===i?'on':''}`} onClick={()=>setSelDay(i)}>
+                            {d}
+                          </button>
+                        ))}
+                      </div>
+                    </>
+                  )}
+
+                  <div className="fg">
+                    <label>{mode==='daily'?'Date':mode==='weekly'?'Week Starting Date':'Month (pick any date in month)'}</label>
+                    <input type="date" value={date} onChange={e=>setDate(e.target.value)} />
+                  </div>
+                </div>
+
+                {/* Performance inputs */}
+                <div className="fc">
+                  <div className="fc-title">Basket ROI {mode==='daily'?'— '+DAY_FULL[selDay]:mode==='weekly'?'— Daily Breakdown':'— Monthly'}</div>
+
+                  {(mode==='daily'||mode==='monthly') && BASKETS.map(b=>(
+                    <div className="basket-row" key={b.id}>
+                      <div className="basket-dot" style={{background:b.dotColor}} />
+                      <div className="basket-name">{b.name}</div>
+                      <input className="basket-inp" type="number" step="0.01"
+                        value={mode==='daily'?daily[b.id]:monthly[b.id]}
+                        onChange={e=>mode==='daily'?setDailyVal(b.id,e.target.value):setMonthlyVal(b.id,e.target.value)}
+                        placeholder="0.00" />
+                      <span className="basket-suffix">%</span>
+                    </div>
+                  ))}
+
+                  {mode==='weekly' && (
+                    <>
+                      {BASKETS.map(b=>(
+                        <div key={b.id} style={{marginBottom:'12px'}}>
+                          <div style={{display:'flex',alignItems:'center',gap:'8px',marginBottom:'6px'}}>
+                            <div className="basket-dot" style={{background:b.dotColor}} />
+                            <span style={{fontSize:'12px',fontWeight:'700',color:'var(--text)'}}>{b.name}</span>
+                          </div>
+                          <div className="three" style={{gridTemplateColumns:'repeat(5,1fr)'}}>
+                            {DAYS.map((d,di)=>(
+                              <div key={d} className="fg" style={{marginBottom:0}}>
+                                <label style={{fontSize:'9px',letterSpacing:'1px'}}>{d}</label>
+                                <input className="basket-inp" type="number" step="0.01"
+                                  style={{padding:'5px 7px',fontSize:'11px'}}
+                                  value={weekly[b.id][di]}
+                                  onChange={e=>setWeeklyVal(b.id,di,e.target.value)} />
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      ))}
+                    </>
+                  )}
+                </div>
+
+                {/* Font Sizes */}
+                <div className="fc">
+                  <div className="fc-title">Font Sizes</div>
+                  <Slider label="Period Title" value={fs.title} min={16} max={48} onChange={v=>setF('title',v)} />
+                  <Slider label="Date / Sub-label" value={fs.date} min={10} max={28} onChange={v=>setF('date',v)} />
+                  <Slider label="Basket Name" value={fs.label} min={14} max={48} onChange={v=>setF('label',v)} />
+                  <Slider label="ROI Value" value={fs.value} min={18} max={56} onChange={v=>setF('value',v)} />
+                  <Slider label="Tag / Label" value={fs.tag} min={7} max={16} onChange={v=>setF('tag',v)} />
+                  <Slider label="Disclaimer" value={fs.disc} min={6} max={14} onChange={v=>setF('disc',v)} />
+                </div>
+
+                {/* Logo */}
+                <div className="fc">
+                  <div className="fc-title">Logo</div>
+                  <div className="fg">
+                    <input type="file" accept="image/png,image/jpeg" onChange={handleLogo} />
+                    <small>PNG with transparent background recommended</small>
+                  </div>
+                </div>
+
+                {/* Theme */}
+                <div className="fc">
+                  <div className="fc-title">Color Theme</div>
+                  <div className="theme-grid">
+                    {Object.entries(THEMES).map(([k,t])=>(
+                      <button key={k} className={`t-btn ${theme===k?'on':''}`} onClick={()=>setTheme(k)}>
+                        <div className="t-swatch" style={{background:t.bg}} />
+                        <div className="t-name">{t.name}</div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Disclaimer */}
+                <div className="fc">
+                  <div className="fc-title">Disclaimer</div>
+                  <div className="fg">
+                    <textarea value={disclaimer} onChange={e=>setDisclaimer(e.target.value)} rows="3" />
+                  </div>
+                </div>
+
+                <button className="dl-btn" onClick={download} disabled={busy}>
+                  {busy?'⏳ Generating PNG…':'📥 Download Report PNG'}
+                </button>
+              </div>
+            </div>
+
+            {/* PREVIEW */}
+            <div className="preview">
+              <div className="p-head">
+                <h2>Live Preview</h2>
+                <p>Your report will look exactly like this when downloaded</p>
+              </div>
+              <div className="p-wrap">
+                <div ref={ref} className="rc" style={{background:T.bg, color:T.textColor}}>
+
+                  {/* HEADER */}
+                  <div className="rc-hdr">
+                    {logo && (
+                      <div className="rc-logo-wrap">
+                        <img src={logo} alt="Logo" className="rc-logo" crossOrigin="anonymous" />
+                      </div>
+                    )}
+                    <div style={{marginBottom:'6px'}}>
+                      <span className="rc-period-pill">{mode==='daily'?'Daily':'mode'==='weekly'?'Weekly':'Monthly'} {mode==='daily'?'Report':mode==='weekly'?'Report':'Report'}</span>
+                    </div>
+                    <div style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:`${fs.title}px`,letterSpacing:'5px',textTransform:'uppercase',lineHeight:1,color:T.textColor}}>
+                      {periodLabel}
+                    </div>
+                    <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:`${fs.date}px`,fontWeight:500,letterSpacing:'0.8px',marginTop:'8px',paddingBottom:'14px',borderBottom:`1px solid ${T.dateBorder}`,opacity:.75,color:T.textColor}}>
+                      {subLabel}
+                    </div>
+                  </div>
+
+                  {/* BASKET CARDS */}
+                  <div className="bkt-table">
+                    {BASKETS.map((b,i)=>{
+                      const roi = getROI(b.id);
+                      const tint = T.tints[i] || T.tints[0];
+                      const col = plColor(roi);
+                      const maxH = 40;
+
+                      return (
+                        <div key={b.id} className="bkt-card" style={{background:tint, flex:1}}>
+                          <div className="bkt-left">
+                            <div className="bkt-tag" style={{fontSize:`${fs.tag}px`,color:'rgba(255,255,255,0.55)',letterSpacing:'2px'}}>
+                              {b.tag}
+                            </div>
+                            <div className="bkt-label" style={{fontSize:`${fs.label}px`,color:T.textColor,fontFamily:"'Bebas Neue',sans-serif",letterSpacing:'3px'}}>
+                              {b.name}
+                            </div>
+                            {/* Weekly mini bars */}
+                            {mode==='weekly' && (
+                              <div className="day-bars" style={{marginTop:'8px'}}>
+                                {DAYS.map((d,di)=>{
+                                  const v=parseFloat(weekly[b.id][di])||0;
+                                  const mx=maxAbs(weekly[b.id]);
+                                  const h=Math.max(3,Math.round((Math.abs(v)/mx)*maxH));
+                                  const bc=plColor(v);
+                                  return (
+                                    <div key={d} className="day-col">
+                                      <div className="day-bar-wrap">
+                                        <div className="day-bar" style={{height:`${h}px`,background:bc,opacity:.85}} />
+                                      </div>
+                                      <div className="day-label-sm" style={{color:'rgba(255,255,255,0.45)'}}>{d}</div>
+                                      <div className="day-val-sm" style={{color:bc}}>{sgn(v)}{v}%</div>
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            )}
+                          </div>
+                          <div className="bkt-right">
+                            <span className="bkt-arrow" style={{color:col,fontSize:`${Math.round(fs.value*0.55)}px`}}>{arr(roi)}</span>
+                            <div className="bkt-val" style={{fontSize:`${fs.value}px`,color:col}}>
+                              {sgn(roi)}{roi}%
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  {/* DISCLAIMER */}
+                  <div className="rc-disc" style={{fontSize:`${fs.disc}px`}}>
+                    <strong>DISCLAIMER: </strong>{disclaimer}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+      }
+
+      ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+  </body>
+</html>
